@@ -30,18 +30,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  async rewrites() {
-    return [
-      {
-        source: '/api/actions/:path*',
-        destination: '/api/actions/:path*',
-      },
-      {
-        source: '/api/actions/create-post',
-        destination: '/api/actions/create-post',
-      },
-    ];
-  },
 };
 
 export default nextConfig;
