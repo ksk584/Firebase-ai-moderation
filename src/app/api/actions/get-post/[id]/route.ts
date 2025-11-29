@@ -1,6 +1,5 @@
 import {NextRequest, NextResponse} from 'next/server';
-import {initializeApp, getApp, getApps, App, ServiceAccount} from 'firebase-admin/app';
-import {getAuth as getAdminAuth} from 'firebase-admin/auth';
+import {initializeApp, getApp, getApps, App} from 'firebase-admin/app';
 import {getFirestore} from 'firebase-admin/firestore';
 
 
@@ -8,26 +7,9 @@ function getAdminApp(): App {
   if (getApps().length > 0) {
     return getApp();
   }
-
-  const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT;
-  if (serviceAccount) {
-    try {
-      const serviceAccountJson = JSON.parse(
-        Buffer.from(serviceAccount, 'base64').toString('utf-8')
-      );
-      return initializeApp({
-        credential: {
-          projectId: serviceAccountJson.project_id,
-          clientEmail: serviceAccountJson.client_email,
-          privateKey: serviceAccountJson.private_key,
-        },
-        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-      });
-    } catch (e: any) {
-      console.error('Error parsing FIREBASE_SERVICE_ACCOUNT:', e.message);
-    }
-  }
-
+  
+  // When running on App Hosting or with GOOGLE_APPLICATION_CREDENTIALS set,
+  // the SDK will automatically find the credentials.
   return initializeApp({
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
   });
@@ -53,7 +35,15 @@ export async function GET(
       return NextResponse.json({ error: 'Post not found' }, { status: 404 });
     }
 
-    const post = { id: docSnap.id, ...docSnap.data() };
+    const postData = docSnap.data();
+    // The Timestamp object from Firestore isn't directly serializable to JSON for the client.
+    // We need to convert it.
+    const post = { 
+      id: docSnap.id, 
+      ...postData,
+      createdAt: postData?.createdAt.toDate().toISOString(),
+    };
+    
     return NextResponse.json(post);
   } catch (error) {
     console.error('Error fetching post:', error);

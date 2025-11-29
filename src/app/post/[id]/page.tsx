@@ -105,7 +105,7 @@ export default function PostPage() {
         </CardContent>
         <CardFooter className="text-xs text-muted-foreground p-4 pt-0">
           {post.createdAt ? (
-             <p>{formatDistanceToNow(new Date(post.createdAt.seconds * 1000), { addSuffix: true })}</p>
+             <p>{formatDistanceToNow(new Date(post.createdAt as string), { addSuffix: true })}</p>
           ) : (
             <p>just now</p>
           )}
