@@ -12,7 +12,10 @@ function getAdminApp(): App {
     }
     // This will use the GOOGLE_APPLICATION_CREDENTIALS environment variable
     // for authentication, which is automatically set in App Hosting.
-    return initializeApp();
+    // When running locally, you will need to set this variable yourself.
+    return initializeApp({
+        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    });
 }
 
 const db = getFirestore(getAdminApp());
