@@ -50,6 +50,16 @@ export default function PostPage() {
     fetchPost();
   }, [id, toast]);
 
+  const getUsername = (email?: string) => {
+    if (!email) return 'Anonymous';
+    return email.substring(0, 5);
+  }
+
+  const getInitials = (email?: string) => {
+    if (!email) return 'A';
+    return email[0].toUpperCase();
+  }
+
   const renderContent = () => {
     if (loading) {
       return (
@@ -95,9 +105,9 @@ export default function PostPage() {
         <CardHeader>
             <div className="flex items-center gap-3">
                 <Avatar>
-                    <AvatarFallback>{post.authorEmail?.[0].toUpperCase()}</AvatarFallback>
+                    <AvatarFallback>{getInitials(post.authorEmail)}</AvatarFallback>
                 </Avatar>
-                <CardTitle className="text-sm font-medium">{post.authorEmail || 'Anonymous'}</CardTitle>
+                <CardTitle className="text-sm font-medium">{getUsername(post.authorEmail)}</CardTitle>
             </div>
         </CardHeader>
         <CardContent className="p-6 pt-0">

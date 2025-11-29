@@ -15,6 +15,12 @@ export function PostCard({ post }: PostCardProps) {
     if (!email) return 'A';
     return email[0].toUpperCase();
   }
+
+  const getUsername = (email?: string) => {
+    if (!email) return 'Anonymous';
+    return email.substring(0, 5);
+  }
+
   return (
     <Link href={`/post/${post.id}`} className="block animate-in fade-in-0 duration-500">
       <Card className="w-full break-inside-avoid shadow-md hover:shadow-primary/20 transition-shadow">
@@ -23,7 +29,7 @@ export function PostCard({ post }: PostCardProps) {
                 <Avatar>
                     <AvatarFallback>{getInitials(post.authorEmail)}</AvatarFallback>
                 </Avatar>
-                <CardTitle className="text-sm font-medium">{post.authorEmail || 'Anonymous'}</CardTitle>
+                <CardTitle className="text-sm font-medium">{getUsername(post.authorEmail)}</CardTitle>
             </div>
         </CardHeader>
         <CardContent className="p-6 pt-0">
