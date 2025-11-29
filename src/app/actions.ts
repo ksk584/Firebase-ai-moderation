@@ -1,8 +1,11 @@
 'use server';
-
-import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
+import { initializeApp, getApp, getApps } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+
+const app = getApps().length === 0 ? initializeApp() : getApp();
+const db = getFirestore(app);
+
 
 export async function createPost(content: string) {
   if (!content.trim()) {
@@ -10,9 +13,9 @@ export async function createPost(content: string) {
   }
 
   try {
-    await addDoc(collection(db, 'posts'), {
+    await db.collection('posts').add({
       content,
-      createdAt: serverTimestamp(),
+      createdAt: new Date(),
     });
     
     revalidatePath('/');

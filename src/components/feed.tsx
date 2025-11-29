@@ -22,6 +22,7 @@ export function Feed() {
   const { toast } = useToast();
 
   useEffect(() => {
+    if (!db) return;
     const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const postsData = querySnapshot.docs.map((doc) => ({
@@ -77,6 +78,18 @@ export function Feed() {
   };
 
   const displayedPosts = activeFilter ? filteredPosts : posts;
+
+  if (!db) {
+    return (
+       <div className="w-full space-y-6">
+        <div className="space-y-4">
+            <Skeleton className="h-32 w-full rounded-lg" />
+            <Skeleton className="h-28 w-full rounded-lg" />
+            <Skeleton className="h-36 w-full rounded-lg" />
+        </div>
+       </div>
+    );
+  }
 
   return (
     <div className="w-full space-y-6">

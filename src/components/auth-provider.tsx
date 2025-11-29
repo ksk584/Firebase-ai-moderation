@@ -1,6 +1,6 @@
 'use client';
 
-import { auth, signInAnonymously, onAuthStateChanged, User } from '@/lib/firebase';
+import { auth, signInAnonymously, onAuthStateChanged, User, db } from '@/lib/firebase';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Skeleton } from './ui/skeleton';
 
@@ -19,6 +19,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!auth) {
+      // This can happen during server-side rendering
+      return;
+    }
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
@@ -36,7 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  if (loading) {
+  if (loading || !db) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
         <div className="w-full max-w-2xl space-y-4">
