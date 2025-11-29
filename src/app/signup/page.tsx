@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription }
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/auth-provider';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import Link from 'next/link';
 
 const formSchema = z.object({
@@ -20,6 +20,7 @@ const formSchema = z.object({
 
 export default function SignupPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
   const { toast } = useToast();
   const { auth } = useAuth();
 
@@ -50,6 +51,26 @@ export default function SignupPage() {
     }
   }
 
+  async function handleGoogleSignIn() {
+    setIsGoogleSubmitting(true);
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+      toast({
+        title: 'Success',
+        description: 'Your account has been created with Google.',
+      });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Google Sign-Up Failed',
+        description: error.message,
+      });
+    } finally {
+      setIsGoogleSubmitting(false);
+    }
+  }
+
   return (
     <main className="container mx-auto flex min-h-screen items-center justify-center px-4">
       <Card className="w-full max-w-sm">
@@ -57,7 +78,7 @@ export default function SignupPage() {
           <CardTitle>Sign Up</CardTitle>
           <CardDescription>Create a new account to start sharing.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="grid gap-4">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -86,11 +107,24 @@ export default function SignupPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Button type="submit" className="w-full" disabled={isSubmitting || isGoogleSubmitting}>
                 {isSubmitting ? 'Creating account...' : 'Sign Up'}
               </Button>
             </form>
           </Form>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Or continue with
+              </span>
+            </div>
+          </div>
+          <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isSubmitting || isGoogleSubmitting}>
+             {isGoogleSubmitting ? 'Signing up...' : 'Continue with Google'}
+          </Button>
         </CardContent>
          <CardFooter className="flex justify-center">
             <p className="text-sm text-muted-foreground">
