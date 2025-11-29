@@ -11,13 +11,17 @@ interface PostCardProps {
 }
 
 export function PostCard({ post }: PostCardProps) {
+  const getInitials = (email?: string) => {
+    if (!email) return 'A';
+    return email[0].toUpperCase();
+  }
   return (
     <Link href={`/post/${post.id}`} className="block animate-in fade-in-0 duration-500">
       <Card className="w-full break-inside-avoid shadow-md hover:shadow-primary/20 transition-shadow">
         <CardHeader>
             <div className="flex items-center gap-3">
                 <Avatar>
-                    <AvatarFallback>{post.authorEmail?.[0].toUpperCase()}</AvatarFallback>
+                    <AvatarFallback>{getInitials(post.authorEmail)}</AvatarFallback>
                 </Avatar>
                 <CardTitle className="text-sm font-medium">{post.authorEmail || 'Anonymous'}</CardTitle>
             </div>
@@ -27,7 +31,7 @@ export function PostCard({ post }: PostCardProps) {
         </CardContent>
         <CardFooter className="text-xs text-muted-foreground p-4 pt-0">
           {post.createdAt ? (
-            <p>{formatDistanceToNow(new Date(post.createdAt.seconds * 1000), { addSuffix: true })}</p>
+            <p>{formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}</p>
           ) : (
             <p>just now</p>
           )}
