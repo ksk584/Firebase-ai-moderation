@@ -4,13 +4,13 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { createPost } from '@/app/actions';
 import { SendHorizonal } from 'lucide-react';
 import { useAuth } from './auth-provider';
 
@@ -22,6 +22,7 @@ export function PostForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -41,25 +42,39 @@ export function PostForm() {
     }
     
     setIsSubmitting(true);
-    const idToken = await user.getIdToken();
-    
-    // We are not using the result of createPost on the client side, so we don't need to await it.
-    // This makes the UI feel faster.
-    fetch('/api/actions/create-post', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${idToken}`,
-      },
-      body: JSON.stringify({ content: values.content }),
-    });
+    try {
+        const idToken = await user.getIdToken();
+        
+        const response = await fetch('/api/actions/create-post', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${idToken}`,
+          },
+          body: JSON.stringify({ content: values.content }),
+        });
 
-    form.reset();
-    toast({
-      title: 'Success',
-      description: 'Your post has been shared.',
-    });
-    setIsSubmitting(false);
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to create post.');
+        }
+
+        form.reset();
+        toast({
+          title: 'Success',
+          description: 'Your post has been shared.',
+        });
+        // Manually trigger a re-fetch of data on the page
+        router.refresh();
+    } catch (error: any) {
+         toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: error.message || 'Could not create post.',
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   }
 
   return (
@@ -77,7 +92,7 @@ export function PostForm() {
                 <FormItem>
                   <FormControl>
                     <Textarea
-                      placeholder="What's on your mind?..."
+                      placeholder="What\'s on your mind?..."
                       className="resize-none"
                       rows={4}
                       {...field}
