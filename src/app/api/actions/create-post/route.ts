@@ -1,3 +1,4 @@
+
 import {NextRequest, NextResponse} from 'next/server';
 import {initializeApp, getApp, getApps, App} from 'firebase-admin/app';
 import {getAuth as getAdminAuth} from 'firebase-admin/auth';
@@ -23,7 +24,10 @@ const db = getFirestore(getAdminApp());
 const adminAuth = getAdminAuth(getAdminApp());
 
 export async function POST(req: NextRequest) {
+  console.log("----------------------------------------"); // <--- Visual separator
+  console.log("🚨 API HIT: createpost route triggered 🚨");   // <--- Easy to spot flag
   const authorization = req.headers.get('Authorization');
+  console.log("Token received:", authorization ? "YES" : "NO"); // <--- Debug check
   if (!authorization?.startsWith('Bearer ')) {
     return NextResponse.json({error: 'Unauthorized'}, {status: 401});
   }
