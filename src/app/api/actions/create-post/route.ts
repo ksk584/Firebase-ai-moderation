@@ -16,18 +16,15 @@ function getAdminApp(): App {
   // which are automatically set in App Hosting.
   // When running locally, you will need to set GOOGLE_APPLICATION_CREDENTIALS
   // to point to your service account key file.
-  const serviceAccount = process.env.GOOGLE_APPLICATION_CREDENTIALS ? 
-    JSON.parse(Buffer.from(process.env.GOOGLE_APPLICATION_CREDENTIALS, 'base64').toString('utf-8')) :
-    undefined;
-
-  if (serviceAccount) {
+  if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    const serviceAccount = JSON.parse(Buffer.from(process.env.GOOGLE_APPLICATION_CREDENTIALS, 'base64').toString('utf-8'))
     return initializeApp({
       credential: cert(serviceAccount),
       projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
     });
   }
 
-  // Fallback for environments where GOOGLE_APPLICATION_CREDENTIALS is not set as base64
+  // When running on App Hosting, the SDK will automatically find the credentials.
   return initializeApp({
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
   });
