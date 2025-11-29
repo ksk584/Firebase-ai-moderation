@@ -1,11 +1,21 @@
 'use server';
 import { revalidatePath } from 'next/cache';
-import { initializeApp, getApp, getApps } from 'firebase-admin/app';
+import { initializeApp, getApp, getApps, App } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 
-const app = getApps().length === 0 ? initializeApp() : getApp();
-const db = getFirestore(app);
+// Note: This is a server-side only file.
+// Do not use client-side firebase imports here.
 
+function getAdminApp(): App {
+    if (getApps().length > 0) {
+        return getApp();
+    }
+    // This will use the GOOGLE_APPLICATION_CREDENTIALS environment variable
+    // for authentication, which is automatically set in App Hosting.
+    return initializeApp();
+}
+
+const db = getFirestore(getAdminApp());
 
 export async function createPost(content: string) {
   if (!content.trim()) {
@@ -15,6 +25,7 @@ export async function createPost(content: string) {
   try {
     await db.collection('posts').add({
       content,
+      // Use Firestore server timestamp for consistency
       createdAt: new Date(),
     });
     

@@ -1,28 +1,44 @@
 'use client';
 
-import { auth, signInAnonymously, onAuthStateChanged, User, db } from '@/lib/firebase';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Skeleton } from './ui/skeleton';
+import { getAuth, onAuthStateChanged, signInAnonymously, type User } from 'firebase/auth';
+import { getFirestore, type Firestore }from 'firebase/firestore';
+import { getApp, getApps, initializeApp, type FirebaseApp } from 'firebase/app';
+import { firebaseConfig } from '@/lib/firebase';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  app: FirebaseApp;
+  auth: ReturnType<typeof getAuth>;
+  db: Firestore;
 }
 
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  loading: true,
-});
+const AuthContext = createContext<AuthContextType | null>(null);
+
+function initializeClientApp() {
+  if (getApps().length > 0) {
+      return getApp();
+  }
+  return initializeApp(firebaseConfig);
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [firebase, setFirebase] = useState<{
+    app: FirebaseApp;
+    auth: ReturnType<typeof getAuth>;
+    db: Firestore;
+  } | null>(null);
 
   useEffect(() => {
-    if (!auth) {
-      // This can happen during server-side rendering
-      return;
-    }
+    const app = initializeClientApp();
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    setFirebase({ app, auth, db });
+
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
@@ -40,7 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  if (loading || !db) {
+  if (loading || !firebase) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
         <div className="w-full max-w-2xl space-y-4">
@@ -53,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading, ...firebase }}>
       {children}
     </AuthContext.Provider>
   );
@@ -61,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (context === null) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

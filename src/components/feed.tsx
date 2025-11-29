@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useTransition } from 'react';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { useAuth } from './auth-provider';
 import type { Post } from '@/lib/types';
 import { PostCard } from './post-card';
 import { Skeleton } from './ui/skeleton';
@@ -20,9 +20,11 @@ export function Feed() {
   const [isFiltering, startFiltering] = useTransition();
   const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
   const { toast } = useToast();
+  const { db } = useAuth();
 
   useEffect(() => {
     if (!db) return;
+    setLoading(true);
     const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const postsData = querySnapshot.docs.map((doc) => ({
@@ -38,7 +40,7 @@ export function Feed() {
     });
 
     return () => unsubscribe();
-  }, [toast]);
+  }, [db, toast]);
 
   useEffect(() => {
     if (!activeFilter) {
