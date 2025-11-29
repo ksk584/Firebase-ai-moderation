@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, Timestamp } from 'firebase/firestore';
 import { useAuth } from './auth-provider';
 import type { Post } from '@/lib/types';
 import { PostCard } from './post-card';
@@ -24,12 +24,27 @@ export function Feed() {
     const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
     
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const postsData = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        // Make sure createdAt is a serializable format if it exists
-        createdAt: doc.data().createdAt?.toDate ? doc.data().createdAt.toDate().toISOString() : new Date().toISOString(),
-      })) as Post[];
+      const postsData = querySnapshot.docs.map((doc) => {
+        const data = doc.data();
+        const createdAt = data.createdAt;
+        // Firestore timestamps need to be converted to a serializable format
+        let serializableCreatedAt: string;
+        if (createdAt instanceof Timestamp) {
+            serializableCreatedAt = createdAt.toDate().toISOString();
+        } else if (createdAt && typeof createdAt.seconds === 'number') {
+            serializableCreatedAt = new Date(createdAt.seconds * 1000).toISOString();
+        } else {
+            serializableCreatedAt = new Date().toISOString();
+        }
+
+        return {
+          id: doc.id,
+          content: data.content,
+          authorId: data.authorId,
+          authorEmail: data.authorEmail,
+          createdAt: serializableCreatedAt,
+        } as Post;
+      });
       setPosts(postsData);
       setLoading(false);
     }, (error) => {
