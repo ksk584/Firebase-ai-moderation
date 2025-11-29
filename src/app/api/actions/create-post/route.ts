@@ -1,8 +1,8 @@
-
 import {NextRequest, NextResponse} from 'next/server';
 import {initializeApp, getApp, getApps, App} from 'firebase-admin/app';
 import {getAuth as getAdminAuth} from 'firebase-admin/auth';
 import {getFirestore} from 'firebase-admin/firestore';
+import { moderatePost } from '@/ai/flows/moderate-post';
 
 // Note: This is a server-side only file.
 // Do not use client-side firebase imports here.
@@ -45,6 +45,21 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    const moderationResult = await moderatePost({ content });
+
+    if (moderationResult.offensive) {
+      // Store the offensive post and reason in a separate collection
+      await db.collection('flagged_posts').add({
+        content,
+        authorId: uid,
+        authorEmail: email || 'Anonymous',
+        flaggedAt: new Date(),
+        reason: moderationResult.reason,
+      });
+
+      return NextResponse.json({error: `Post rejected: ${moderationResult.reason}`}, {status: 400});
+    }
+
     const docRef = await db.collection('posts').add({
       content,
       createdAt: new Date(),
