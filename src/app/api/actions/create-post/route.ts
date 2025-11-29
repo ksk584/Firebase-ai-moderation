@@ -1,6 +1,6 @@
 
 import {NextRequest, NextResponse} from 'next/server';
-import {initializeApp, getApp, getApps, App} from 'firebase-admin/app';
+import {initializeApp, getApp, getApps, App, ServiceAccount, cert} from 'firebase-admin/app';
 import {getAuth as getAdminAuth} from 'firebase-admin/auth';
 import {getFirestore} from 'firebase-admin/firestore';
 
@@ -11,9 +11,23 @@ function getAdminApp(): App {
   if (getApps().length > 0) {
     return getApp();
   }
-  // This will use the GOOGLE_APPLICATION_CREDENTIALS environment variable
-  // for authentication, which is automatically set in App Hosting.
-  // When running locally, you will need to set this variable yourself.
+  
+  // This will use the service account credentials from the environment variables
+  // which are automatically set in App Hosting.
+  // When running locally, you will need to set GOOGLE_APPLICATION_CREDENTIALS
+  // to point to your service account key file.
+  const serviceAccount = process.env.GOOGLE_APPLICATION_CREDENTIALS ? 
+    JSON.parse(Buffer.from(process.env.GOOGLE_APPLICATION_CREDENTIALS, 'base64').toString('utf-8')) :
+    undefined;
+
+  if (serviceAccount) {
+    return initializeApp({
+      credential: cert(serviceAccount),
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    });
+  }
+
+  // Fallback for environments where GOOGLE_APPLICATION_CREDENTIALS is not set as base64
   return initializeApp({
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
   });
@@ -45,15 +59,15 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    await db.collection('posts').add({
+    const docRef = await db.collection('posts').add({
       content,
       createdAt: new Date(),
       authorId: uid,
-      authorEmail: email,
+      authorEmail: email || 'Anonymous',
     });
 
     // Revalidation is handled on the client-side after a successful post.
-    return NextResponse.json({success: true});
+    return NextResponse.json({success: true, id: docRef.id});
   } catch (error) {
     console.error('Error creating post:', error);
     return NextResponse.json({error: 'Failed to create post.'}, {status: 500});
