@@ -92,7 +92,7 @@ export function PostForm() {
                 <FormItem>
                   <FormControl>
                     <Textarea
-                      placeholder="What\'s on your mind?..."
+                      placeholder="What's on your mind?..."
                       className="resize-none"
                       rows={4}
                       {...field}
