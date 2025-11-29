@@ -4,8 +4,8 @@ import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/components/auth-provider';
 
 export const metadata: Metadata = {
-  title: 'AnonVerse',
-  description: 'Share your thoughts anonymously.',
+  title: 'SafeSocial',
+  description: 'Share your thoughts safely.',
 };
 
 export default function RootLayout({

@@ -12,6 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '@/component
 import { useToast } from '@/hooks/use-toast';
 import { createPost } from '@/app/actions';
 import { SendHorizonal } from 'lucide-react';
+import { useAuth } from './auth-provider';
 
 const formSchema = z.object({
   content: z.string().min(1, 'Post cannot be empty').max(280, 'Post cannot exceed 280 characters'),
@@ -20,6 +21,7 @@ const formSchema = z.object({
 export function PostForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -29,21 +31,34 @@ export function PostForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true);
-    const result = await createPost(values.content);
-    if (result.error) {
+    if (!user) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: result.error,
+        description: 'You must be logged in to post.',
       });
-    } else {
-      form.reset();
-      toast({
-        title: 'Success',
-        description: 'Your anonymous post has been shared.',
-      });
+      return;
     }
+    
+    setIsSubmitting(true);
+    const idToken = await user.getIdToken();
+    
+    // We are not using the result of createPost on the client side, so we don't need to await it.
+    // This makes the UI feel faster.
+    fetch('/api/actions/create-post', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${idToken}`,
+      },
+      body: JSON.stringify({ content: values.content }),
+    });
+
+    form.reset();
+    toast({
+      title: 'Success',
+      description: 'Your post has been shared.',
+    });
     setIsSubmitting(false);
   }
 
@@ -74,7 +89,7 @@ export function PostForm() {
             />
             <div className="flex justify-end">
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Posting...' : 'Post Anonymously'}
+                {isSubmitting ? 'Posting...' : 'Post'}
                 <SendHorizonal className="ml-2 h-4 w-4" />
               </Button>
             </div>

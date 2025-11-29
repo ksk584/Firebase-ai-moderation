@@ -2,10 +2,11 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Skeleton } from './ui/skeleton';
-import { getAuth, onAuthStateChanged, signInAnonymously, type User } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
 import { getFirestore, type Firestore }from 'firebase/firestore';
 import { getApp, getApps, initializeApp, type FirebaseApp } from 'firebase/app';
 import { firebaseConfig } from '@/lib/firebase';
+import { usePathname, useRouter } from 'next/navigation';
 
 interface AuthContextType {
   user: User | null;
@@ -24,6 +25,8 @@ function initializeClientApp() {
   return initializeApp(firebaseConfig);
 }
 
+const unauthenticatedRoutes = ['/login', '/signup'];
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -32,6 +35,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     auth: ReturnType<typeof getAuth>;
     db: Firestore;
   } | null>(null);
+  const router = useRouter();
+  const pathname = usePathname();
+
 
   useEffect(() => {
     const app = initializeClientApp();
@@ -39,22 +45,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const db = getFirestore(app);
     setFirebase({ app, auth, db });
 
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-      } else {
-        try {
-          const userCredential = await signInAnonymously(auth);
-          setUser(userCredential.user);
-        } catch (error) {
-          console.error("Anonymous sign-in failed:", error);
-        }
-      }
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
       setLoading(false);
+      if (!currentUser && !unauthenticatedRoutes.includes(pathname)) {
+        router.push('/login');
+      } else if (currentUser && unauthenticatedRoutes.includes(pathname)) {
+        router.push('/');
+      }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [pathname, router]);
 
   if (loading || !firebase) {
     return (
@@ -66,6 +68,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         </div>
       </div>
     );
+  }
+  
+  if (!user && !unauthenticatedRoutes.includes(pathname)) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
+        <div className="w-full max-w-2xl space-y-4">
+          <p>Redirecting to login...</p>
+        </div>
+      </div>
+    )
   }
 
   return (

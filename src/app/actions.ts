@@ -1,7 +1,9 @@
 'use server';
 import { revalidatePath } from 'next/cache';
 import { initializeApp, getApp, getApps, App } from 'firebase-admin/app';
+import { getAuth as getAdminAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
+import { headers } from 'next/headers';
 
 // Note: This is a server-side only file.
 // Do not use client-side firebase imports here.
@@ -19,8 +21,25 @@ function getAdminApp(): App {
 }
 
 const db = getFirestore(getAdminApp());
+const adminAuth = getAdminAuth(getAdminApp());
 
 export async function createPost(content: string) {
+  const authorization = headers().get('Authorization');
+  if (!authorization?.startsWith('Bearer ')) {
+    return { error: 'Unauthorized' };
+  }
+  const idToken = authorization.split('Bearer ')[1];
+
+  let decodedToken;
+  try {
+    decodedToken = await adminAuth.verifyIdToken(idToken);
+  } catch (error) {
+    console.error('Error verifying token:', error);
+    return { error: 'Unauthorized' };
+  }
+  
+  const { uid, email } = decodedToken;
+
   if (!content.trim()) {
     return { error: 'Content cannot be empty.' };
   }
@@ -28,8 +47,9 @@ export async function createPost(content: string) {
   try {
     await db.collection('posts').add({
       content,
-      // Use Firestore server timestamp for consistency
       createdAt: new Date(),
+      authorId: uid,
+      authorEmail: email,
     });
     
     revalidatePath('/');
