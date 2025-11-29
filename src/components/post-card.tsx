@@ -18,7 +18,7 @@ export function PostCard({ post }: PostCardProps) {
                 <Avatar>
                     <AvatarFallback>{post.authorEmail?.[0].toUpperCase()}</AvatarFallback>
                 </Avatar>
-                <CardTitle className="text-sm font-medium">{post.authorEmail}</CardTitle>
+                <CardTitle className="text-sm font-medium">{post.authorEmail || 'Anonymous'}</CardTitle>
             </div>
         </CardHeader>
         <CardContent className="p-6 pt-0">
