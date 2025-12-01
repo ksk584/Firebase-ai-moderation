@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +11,7 @@ import { MessageCircle, Trash2 } from 'lucide-react';
 import { useAuth } from './auth-provider';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { ReportPostDialog } from './report-post-dialog';
 
 interface PostCardProps {
   post: Post;
@@ -28,15 +30,6 @@ export function PostCard({ post }: PostCardProps) {
   const getUsername = (email?: string) => {
     if (!email) return 'Anonymous';
     return email.substring(0, 5);
-  };
-
-  const handleReport = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    toast({
-      title: 'Post Reported',
-      description: 'Thank you for your feedback.',
-    });
   };
 
   const handleDelete = async (e: React.MouseEvent) => {
@@ -93,10 +86,12 @@ export function PostCard({ post }: PostCardProps) {
             ) : (
                 <p>just now</p>
             )}
-            <Button variant="ghost" size="sm" onClick={handleReport}>
+             <ReportPostDialog post={post}>
+              <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}>
                 <MessageCircle className="mr-2 h-4 w-4" />
                 Report
-            </Button>
+              </Button>
+            </ReportPostDialog>
             {user && user.uid === post.authorId && (
                 <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={handleDelete}>
                     <Trash2 className="mr-2 h-4 w-4" />

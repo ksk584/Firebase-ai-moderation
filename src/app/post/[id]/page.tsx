@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -13,6 +14,7 @@ import Link from 'next/link';
 import { ArrowLeft, MessageCircle, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/components/auth-provider';
+import { ReportPostDialog } from '@/components/report-post-dialog';
 
 export default function PostPage() {
   const [post, setPost] = useState<Post | null>(null);
@@ -61,15 +63,6 @@ export default function PostPage() {
   const getInitials = (email?: string) => {
     if (!email) return 'A';
     return email[0].toUpperCase();
-  };
-
-  const handleReport = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    toast({
-      title: 'Post Reported',
-      description: 'Thank you for your feedback.',
-    });
   };
 
   const handleDelete = async (e: React.MouseEvent) => {
@@ -163,10 +156,12 @@ export default function PostPage() {
               ) : (
                 <p>just now</p>
               )}
-               <Button variant="ghost" size="sm" onClick={handleReport}>
-                <MessageCircle className="mr-2 h-4 w-4" />
-                Report
-              </Button>
+               <ReportPostDialog post={post}>
+                <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}>
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  Report
+                </Button>
+              </ReportPostDialog>
               {user && user.uid === post.authorId && (
                   <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={handleDelete}>
                       <Trash2 className="mr-2 h-4 w-4" />
