@@ -1,3 +1,4 @@
+
 import type { Timestamp } from "firebase/firestore";
 
 export interface Post {
@@ -9,4 +10,14 @@ export interface Post {
   createdAt: Timestamp | { seconds: number; nanoseconds: number } | Date | string;
   authorId: string;
   authorEmail: string;
+}
+
+export interface Comment {
+  id: string;
+  content: string;
+  imageUrl?: string;
+  createdAt: string; // Already serialized
+  authorId: string;
+  authorEmail: string;
+  postId: string;
 }

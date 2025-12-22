@@ -17,6 +17,9 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/components/auth-provider';
 import { ReportPostDialog } from '@/components/report-post-dialog';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
+import { CommentList } from '@/components/comment-list';
+import { CommentForm } from '@/components/comment-form';
 
 export default function PostPage() {
   const [post, setPost] = useState<Post | null>(null);
@@ -29,7 +32,7 @@ export default function PostPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || typeof id !== 'string') return;
 
     const fetchPost = async () => {
       setLoading(true);
@@ -212,8 +215,20 @@ export default function PostPage() {
             </Link>
           </Button>
         </div>
-        <div className="space-y-8">{renderContent()}</div>
+        <div className="space-y-8">
+            {renderContent()}
+
+            {post && typeof id === 'string' && (
+                <div className="space-y-6">
+                    <Separator />
+                    <h2 className="text-2xl font-bold">Comments</h2>
+                    <CommentForm postId={id} />
+                    <CommentList postId={id} />
+                </div>
+            )}
+        </div>
       </main>
     </>
   );
 }
+
