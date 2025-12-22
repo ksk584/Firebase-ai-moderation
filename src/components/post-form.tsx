@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -14,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from './ui/input';
 import { SendHorizonal, X } from 'lucide-react';
 import { useAuth } from './auth-provider';
+import { cn } from '@/lib/utils';
 
 const formSchema = z.object({
   content: z.string().min(1, 'Post cannot be empty').max(280, 'Post cannot exceed 280 characters'),
