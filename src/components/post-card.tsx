@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { ReportPostDialog } from './report-post-dialog';
 import Image from 'next/image';
+import { Dialog, DialogContent, DialogTrigger } from './ui/dialog';
 
 interface PostCardProps {
   post: Post;
@@ -75,18 +76,31 @@ export function PostCard({ post }: PostCardProps) {
           <CardTitle className="text-sm font-medium">{getUsername(post.authorEmail)}</CardTitle>
         </div>
       </CardHeader>
-      <CardContent className="p-6 pt-0">
-        <Link href={`/post/${post.id}`} className="block space-y-4">
-          {post.imageUrl && (
-            <div className="relative aspect-video w-full">
-              <Image 
-                src={post.imageUrl}
-                alt="Post image"
-                fill
-                className="rounded-md object-cover border"
-              />
-            </div>
-          )}
+      <CardContent className="p-6 pt-0 space-y-4">
+        {post.imageUrl && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <div className="relative aspect-video w-full cursor-pointer">
+                  <Image 
+                    src={post.imageUrl}
+                    alt="Post image"
+                    fill
+                    className="rounded-md object-cover border"
+                  />
+                </div>
+              </DialogTrigger>
+              <DialogContent className="p-0 border-0 max-w-4xl">
+                  <Image 
+                    src={post.imageUrl}
+                    alt="Post image"
+                    width={1920}
+                    height={1080}
+                    className="rounded-md object-contain w-full h-full"
+                  />
+              </DialogContent>
+            </Dialog>
+        )}
+        <Link href={`/post/${post.id}`} className="block">
           <p className="text-foreground/90 whitespace-pre-wrap">{post.content}</p>
         </Link>
       </CardContent>

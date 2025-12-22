@@ -16,6 +16,7 @@ import { ArrowLeft, MessageCircle, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/components/auth-provider';
 import { ReportPostDialog } from '@/components/report-post-dialog';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 
 export default function PostPage() {
   const [post, setPost] = useState<Post | null>(null);
@@ -150,14 +151,27 @@ export default function PostPage() {
         </CardHeader>
         <CardContent className="p-6 pt-0 space-y-4">
            {post.imageUrl && (
-            <div className="relative aspect-video w-full">
-              <Image 
-                src={post.imageUrl}
-                alt="Post image"
-                fill
-                className="rounded-md object-cover border"
-              />
-            </div>
+            <Dialog>
+              <DialogTrigger asChild>
+                <div className="relative aspect-video w-full cursor-pointer">
+                  <Image 
+                    src={post.imageUrl}
+                    alt="Post image"
+                    fill
+                    className="rounded-md object-cover border"
+                  />
+                </div>
+              </DialogTrigger>
+              <DialogContent className="p-0 border-0 max-w-4xl">
+                  <Image 
+                    src={post.imageUrl}
+                    alt="Post image"
+                    width={1920}
+                    height={1080}
+                    className="rounded-md object-contain w-full h-full"
+                  />
+              </DialogContent>
+            </Dialog>
           )}
           <p className="text-foreground/90 whitespace-pre-wrap">{post.content}</p>
         </CardContent>
