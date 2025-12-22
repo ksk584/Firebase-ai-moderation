@@ -8,7 +8,6 @@ import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { SendHorizonal } from 'lucide-react';
@@ -18,7 +17,11 @@ const formSchema = z.object({
   content: z.string().min(1, 'Post cannot be empty').max(280, 'Post cannot exceed 280 characters'),
 });
 
-export function PostForm() {
+interface PostFormProps {
+  onPostSuccess?: () => void;
+}
+
+export function PostForm({ onPostSuccess }: PostFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
@@ -64,8 +67,13 @@ export function PostForm() {
           title: 'Success',
           description: 'Your post has been shared.',
         });
+        
         // Manually trigger a re-fetch of data on the page
         router.refresh();
+        
+        // Call the callback if it exists to close the dialog
+        onPostSuccess?.();
+
     } catch (error: any) {
          toast({
             variant: 'destructive',
@@ -78,39 +86,32 @@ export function PostForm() {
   }
 
   return (
-    <Card className="w-full shadow-lg">
-      <CardHeader>
-        <CardTitle>Share a thought</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="content"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Textarea
-                      placeholder="What's on your mind?..."
-                      className="resize-none"
-                      rows={4}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex justify-end">
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Posting...' : 'Post'}
-                <SendHorizonal className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
+        <FormField
+          control={form.control}
+          name="content"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Textarea
+                  placeholder="What's on your mind?..."
+                  className="resize-none"
+                  rows={4}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div className="flex justify-end">
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Posting...' : 'Post'}
+            <SendHorizonal className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }
