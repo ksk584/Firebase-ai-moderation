@@ -23,6 +23,14 @@ function getAdminApp(): App {
 const db = getFirestore(getAdminApp());
 const adminAuth = getAdminAuth(getAdminApp());
 
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '4.5mb',
+    },
+  },
+}
+
 export async function POST(req: NextRequest) {
   const authorization = req.headers.get('Authorization');
   if (!authorization?.startsWith('Bearer ')) {
