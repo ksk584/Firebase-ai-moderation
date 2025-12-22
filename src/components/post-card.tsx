@@ -12,6 +12,7 @@ import { useAuth } from './auth-provider';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { ReportPostDialog } from './report-post-dialog';
+import Image from 'next/image';
 
 interface PostCardProps {
   post: Post;
@@ -75,7 +76,17 @@ export function PostCard({ post }: PostCardProps) {
         </div>
       </CardHeader>
       <CardContent className="p-6 pt-0">
-        <Link href={`/post/${post.id}`} className="block">
+        <Link href={`/post/${post.id}`} className="block space-y-4">
+          {post.imageUrl && (
+            <div className="relative aspect-video w-full">
+              <Image 
+                src={post.imageUrl}
+                alt="Post image"
+                fill
+                className="rounded-md object-cover border"
+              />
+            </div>
+          )}
           <p className="text-foreground/90 whitespace-pre-wrap">{post.content}</p>
         </Link>
       </CardContent>

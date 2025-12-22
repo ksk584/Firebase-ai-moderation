@@ -5,16 +5,19 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormMessage, FormLabel } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { SendHorizonal } from 'lucide-react';
+import { Input } from './ui/input';
+import { SendHorizonal, X } from 'lucide-react';
 import { useAuth } from './auth-provider';
 
 const formSchema = z.object({
   content: z.string().min(1, 'Post cannot be empty').max(280, 'Post cannot exceed 280 characters'),
+  image: z.any().optional(),
 });
 
 interface PostFormProps {
@@ -23,6 +26,7 @@ interface PostFormProps {
 
 export function PostForm({ onPostSuccess }: PostFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
   const router = useRouter();
@@ -33,6 +37,30 @@ export function PostForm({ onPostSuccess }: PostFormProps) {
       content: '',
     },
   });
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) { // 2MB limit
+        toast({
+          variant: 'destructive',
+          title: 'Image too large',
+          description: 'Please select an image smaller than 2MB.',
+        });
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setImagePreview(null);
+    form.setValue('image', null);
+  }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!user) {
@@ -48,13 +76,18 @@ export function PostForm({ onPostSuccess }: PostFormProps) {
     try {
         const idToken = await user.getIdToken();
         
+        const body = {
+          content: values.content,
+          imageUrl: imagePreview,
+        };
+
         const response = await fetch('/api/actions/create-post', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${idToken}`,
           },
-          body: JSON.stringify({ content: values.content }),
+          body: JSON.stringify(body),
         });
 
         if (!response.ok) {
@@ -63,15 +96,13 @@ export function PostForm({ onPostSuccess }: PostFormProps) {
         }
 
         form.reset();
+        setImagePreview(null);
         toast({
           title: 'Success',
           description: 'Your post has been shared.',
         });
         
-        // Manually trigger a re-fetch of data on the page
         router.refresh();
-        
-        // Call the callback if it exists to close the dialog
         onPostSuccess?.();
 
     } catch (error: any) {
@@ -105,6 +136,45 @@ export function PostForm({ onPostSuccess }: PostFormProps) {
             </FormItem>
           )}
         />
+
+        {imagePreview && (
+          <div className="relative">
+            <Image
+              src={imagePreview}
+              alt="Image preview"
+              width={400}
+              height={300}
+              className="rounded-md object-cover w-full aspect-video"
+            />
+             <Button
+              type="button"
+              variant="destructive"
+              size="icon"
+              className="absolute top-2 right-2 h-6 w-6"
+              onClick={removeImage}
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Remove image</span>
+            </Button>
+          </div>
+        )}
+
+        <FormField
+          control={form.control}
+          name="image"
+          render={({ field }) => (
+            <FormItem>
+               <FormLabel htmlFor="image-upload" className={cn("w-full cursor-pointer", imagePreview && "hidden")}>
+                <Input id="image-upload" type="file" accept="image/png, image/jpeg, image/gif" className="sr-only" onChange={handleImageChange} disabled={isSubmitting} />
+                <div className="border-2 border-dashed border-muted-foreground/50 rounded-md p-4 text-center text-muted-foreground hover:bg-accent">
+                    Add an image (optional)
+                </div>
+              </FormLabel>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <div className="flex justify-end">
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Posting...' : 'Post'}

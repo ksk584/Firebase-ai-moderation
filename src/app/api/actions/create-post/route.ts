@@ -24,10 +24,7 @@ const db = getFirestore(getAdminApp());
 const adminAuth = getAdminAuth(getAdminApp());
 
 export async function POST(req: NextRequest) {
-  console.log("----------------------------------------"); // <--- Visual separator
-  console.log("🚨 API HIT: createpost route triggered 🚨");   // <--- Easy to spot flag
   const authorization = req.headers.get('Authorization');
-  console.log("Token received:", authorization ? "YES" : "NO"); // <--- Debug check
   if (!authorization?.startsWith('Bearer ')) {
     return NextResponse.json({error: 'Unauthorized'}, {status: 401});
   }
@@ -42,7 +39,7 @@ export async function POST(req: NextRequest) {
   }
 
   const {uid, email} = decodedToken;
-  const {content} = await req.json();
+  const {content, imageUrl} = await req.json();
 
   if (!content || !content.trim()) {
     return NextResponse.json({error: 'Content cannot be empty.'}, {status: 400});
@@ -55,6 +52,7 @@ export async function POST(req: NextRequest) {
       // Store the offensive post and reason in a separate collection
       await db.collection('flagged_posts').add({
         content,
+        imageUrl: imageUrl || null,
         authorId: uid,
         authorEmail: email || 'Anonymous',
         flaggedAt: new Date(),
@@ -66,6 +64,7 @@ export async function POST(req: NextRequest) {
 
     const docRef = await db.collection('posts').add({
       content,
+      imageUrl: imageUrl || null,
       createdAt: new Date(),
       authorId: uid,
       authorEmail: email || 'Anonymous',

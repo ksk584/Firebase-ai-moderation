@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowLeft, MessageCircle, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/components/auth-provider';
@@ -107,6 +108,7 @@ export default function PostPage() {
             </div>
           </CardHeader>
           <CardContent>
+            <Skeleton className="h-48 w-full mb-4" />
             <Skeleton className="h-20 w-full" />
           </CardContent>
           <CardFooter>
@@ -146,7 +148,17 @@ export default function PostPage() {
             <CardTitle className="text-sm font-medium">{getUsername(post.authorEmail)}</CardTitle>
           </div>
         </CardHeader>
-        <CardContent className="p-6 pt-0">
+        <CardContent className="p-6 pt-0 space-y-4">
+           {post.imageUrl && (
+            <div className="relative aspect-video w-full">
+              <Image 
+                src={post.imageUrl}
+                alt="Post image"
+                fill
+                className="rounded-md object-cover border"
+              />
+            </div>
+          )}
           <p className="text-foreground/90 whitespace-pre-wrap">{post.content}</p>
         </CardContent>
         <CardFooter className="text-xs text-muted-foreground p-4 pt-0 justify-between">

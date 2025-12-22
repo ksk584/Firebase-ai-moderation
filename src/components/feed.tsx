@@ -40,6 +40,7 @@ export function Feed() {
         return {
           id: doc.id,
           content: data.content,
+          imageUrl: data.imageUrl,
           authorId: data.authorId,
           authorEmail: data.authorEmail,
           createdAt: serializableCreatedAt,
@@ -73,9 +74,9 @@ export function Feed() {
       <div className="space-y-4">
         {loading ? (
           <>
-            <Skeleton className="h-32 w-full rounded-lg" />
-            <Skeleton className="h-28 w-full rounded-lg" />
-            <Skeleton className="h-36 w-full rounded-lg" />
+            <Skeleton className="h-48 w-full rounded-lg" />
+            <Skeleton className="h-56 w-full rounded-lg" />
+            <Skeleton className="h-40 w-full rounded-lg" />
           </>
         ) : posts.length > 0 ? (
           posts.map((post) => <PostCard key={post.id} post={post} />)

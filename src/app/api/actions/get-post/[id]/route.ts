@@ -41,6 +41,7 @@ export async function GET(
     const post = { 
       id: docSnap.id, 
       ...postData,
+      imageUrl: postData?.imageUrl || null,
       createdAt: postData?.createdAt.toDate().toISOString(),
     };
     
