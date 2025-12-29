@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import { initializeApp, getApp, getApps, App } from 'firebase-admin/app';
 import { getAuth as getAdminAuth } from 'firebase-admin/auth';

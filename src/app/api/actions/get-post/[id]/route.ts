@@ -1,3 +1,4 @@
+
 import {NextRequest, NextResponse} from 'next/server';
 import {initializeApp, getApp, getApps, App} from 'firebase-admin/app';
 import {getFirestore} from 'firebase-admin/firestore';
@@ -8,8 +9,6 @@ function getAdminApp(): App {
     return getApp();
   }
   
-  // When running on App Hosting or with GOOGLE_APPLICATION_CREDENTIALS set,
-  // the SDK will automatically find the credentials.
   return initializeApp({
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
   });
