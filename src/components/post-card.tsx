@@ -102,13 +102,15 @@ export function PostCard({ post }: PostCardProps) {
 
   return (
     <Card className="w-full break-inside-avoid shadow-md hover:shadow-primary/20 transition-shadow">
-       <Link href={`/post/${post.id}`} className="block">
+       <div className="block">
         <CardHeader>
             <div className="flex items-center gap-3">
             <Avatar>
                 <AvatarFallback>{getInitials(post.authorEmail)}</AvatarFallback>
             </Avatar>
-            <CardTitle className="text-sm font-medium">{getUsername(post.authorEmail)}</CardTitle>
+            <Link href={`/profile/${post.authorId}`} className="hover:underline">
+              <CardTitle className="text-sm font-medium">{getUsername(post.authorEmail)}</CardTitle>
+            </Link>
             </div>
         </CardHeader>
         <CardContent className="p-6 pt-0 space-y-4">
@@ -135,9 +137,11 @@ export function PostCard({ post }: PostCardProps) {
                 </DialogContent>
                 </Dialog>
             )}
-            <p className="text-foreground/90 whitespace-pre-wrap">{post.content}</p>
+            <Link href={`/post/${post.id}`} className="block">
+              <p className="text-foreground/90 whitespace-pre-wrap">{post.content}</p>
+            </Link>
         </CardContent>
-      </Link>
+      </div>
       <CardFooter className="text-xs text-muted-foreground p-4 pt-0 justify-between items-center">
         <div className="flex items-center gap-1 sm:gap-2">
             <Button variant="ghost" size="sm" onClick={handleLike} className={userVote === 'like' ? 'text-primary' : ''}>
@@ -162,7 +166,7 @@ export function PostCard({ post }: PostCardProps) {
                 <p className="hidden sm:block">just now</p>
             )}
              <ReportPostDialog post={post}>
-              <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); }}>
+              <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}>
                 Report
               </Button>
             </ReportPostDialog>

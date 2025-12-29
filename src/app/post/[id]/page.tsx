@@ -149,7 +149,9 @@ export default function PostPage() {
             <Avatar>
               <AvatarFallback>{getInitials(post.authorEmail)}</AvatarFallback>
             </Avatar>
-            <CardTitle className="text-sm font-medium">{getUsername(post.authorEmail)}</CardTitle>
+            <Link href={`/profile/${post.authorId}`} className="hover:underline">
+              <CardTitle className="text-sm font-medium">{getUsername(post.authorEmail)}</CardTitle>
+            </Link>
           </div>
         </CardHeader>
         <CardContent className="p-6 pt-0 space-y-4">
@@ -186,7 +188,7 @@ export default function PostPage() {
                 <p>just now</p>
               )}
                <ReportPostDialog post={post}>
-                <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); }}>
+                <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}>
                   Report
                 </Button>
               </ReportPostDialog>

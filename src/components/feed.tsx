@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -7,12 +8,15 @@ import type { Post } from '@/lib/types';
 import { PostCard } from './post-card';
 import { Skeleton } from './ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
+import { useBlocklist } from '@/hooks/use-blocklist';
 
 export function Feed() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const { db } = useAuth();
+  const { blocklist } = useBlocklist();
+
 
   useEffect(() => {
     if (!db) {
@@ -69,6 +73,8 @@ export function Feed() {
     );
   }
 
+  const filteredPosts = posts.filter(post => !blocklist.includes(post.authorId));
+
   return (
     <div className="w-full space-y-6">
       <div className="space-y-4">
@@ -78,8 +84,8 @@ export function Feed() {
             <Skeleton className="h-56 w-full rounded-lg" />
             <Skeleton className="h-40 w-full rounded-lg" />
           </>
-        ) : posts.length > 0 ? (
-          posts.map((post) => <PostCard key={post.id} post={post} />)
+        ) : filteredPosts.length > 0 ? (
+          filteredPosts.map((post) => <PostCard key={post.id} post={post} />)
         ) : (
           <div className="text-center py-10">
             <p className="text-muted-foreground">

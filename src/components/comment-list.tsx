@@ -14,6 +14,9 @@ import { Dialog, DialogContent, DialogTrigger } from './ui/dialog';
 import { Button } from './ui/button';
 import { Trash2 } from 'lucide-react';
 import { ReportCommentDialog } from './report-comment-dialog';
+import Link from 'next/link';
+import { useBlocklist } from '@/hooks/use-blocklist';
+
 
 interface CommentListProps {
     postId: string;
@@ -24,6 +27,7 @@ export function CommentList({ postId }: CommentListProps) {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const { user, db } = useAuth();
+  const { blocklist } = useBlocklist();
 
   useEffect(() => {
     if (!db || !postId) {
@@ -129,18 +133,22 @@ export function CommentList({ postId }: CommentListProps) {
        </div>
     );
   }
+  
+  const filteredComments = comments.filter(comment => !blocklist.includes(comment.authorId));
 
   return (
     <div className="w-full space-y-6">
-      {comments.length > 0 ? (
-        comments.map((comment) => (
+      {filteredComments.length > 0 ? (
+        filteredComments.map((comment) => (
             <div key={comment.id} className="flex gap-4">
                 <Avatar>
                     <AvatarFallback>{getInitials(comment.authorEmail)}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 space-y-2">
                     <div className="flex items-baseline gap-2">
-                        <p className="font-semibold text-sm">{getUsername(comment.authorEmail)}</p>
+                        <Link href={`/profile/${comment.authorId}`} className="hover:underline">
+                            <p className="font-semibold text-sm">{getUsername(comment.authorEmail)}</p>
+                        </Link>
                         <p className="text-xs text-muted-foreground">
                             {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
                         </p>
@@ -173,7 +181,7 @@ export function CommentList({ postId }: CommentListProps) {
                     </div>
                      <div className="flex items-center gap-2 -ml-2">
                         <ReportCommentDialog comment={comment}>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}>
                             Report
                           </Button>
                         </ReportCommentDialog>
