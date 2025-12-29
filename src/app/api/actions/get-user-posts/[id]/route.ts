@@ -1,14 +1,17 @@
 
 import {NextRequest, NextResponse} from 'next/server';
-import {initializeApp, getApp, getApps, App} from 'firebase-admin/app';
+import {initializeApp, getApp, getApps, App, cert} from 'firebase-admin/app';
 import {getFirestore} from 'firebase-admin/firestore';
 
 function getAdminApp(): App {
   if (getApps().length > 0) {
     return getApp();
   }
+
+  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY as string);
   
   return initializeApp({
+    credential: cert(serviceAccount),
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
   });
 }

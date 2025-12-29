@@ -1,6 +1,6 @@
 
 import {NextRequest, NextResponse} from 'next/server';
-import {initializeApp, getApp, getApps, App} from 'firebase-admin/app';
+import {initializeApp, getApp, getApps, App, cert} from 'firebase-admin/app';
 import {getAuth as getAdminAuth} from 'firebase-admin/auth';
 import {getFirestore} from 'firebase-admin/firestore';
 import { moderatePost } from '@/ai/flows/moderate-post';
@@ -13,7 +13,10 @@ function getAdminApp(): App {
     return getApp();
   }
   
+  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY as string);
+
   return initializeApp({
+    credential: cert(serviceAccount),
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
   });
 }
