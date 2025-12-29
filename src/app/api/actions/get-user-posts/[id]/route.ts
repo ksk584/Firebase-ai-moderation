@@ -8,15 +8,16 @@ function getAdminApp(): App {
     return getApp();
   }
 
+  if (!process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+    throw new Error('Firebase service account key is not set.');
+  }
+
   const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY as string);
   
   return initializeApp({
     credential: cert(serviceAccount),
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
   });
 }
-
-const db = getFirestore(getAdminApp());
 
 export async function GET(
   req: NextRequest,
@@ -29,6 +30,7 @@ export async function GET(
   }
 
   try {
+    const db = getFirestore(getAdminApp());
     const postsQuery = db.collection('posts').where('authorId', '==', userId).orderBy('createdAt', 'desc');
     const querySnapshot = await postsQuery.get();
 
@@ -42,8 +44,8 @@ export async function GET(
     });
     
     return NextResponse.json(posts);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching user posts:', error);
-    return NextResponse.json({ error: 'Failed to fetch user posts.' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Failed to fetch user posts.' }, { status: 500 });
   }
 }

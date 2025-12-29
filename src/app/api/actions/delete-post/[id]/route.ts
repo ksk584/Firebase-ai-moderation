@@ -9,40 +9,43 @@ function getAdminApp(): App {
     return getApp();
   }
 
+  if (!process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+    throw new Error('Firebase service account key is not set.');
+  }
+
   const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY as string);
 
   return initializeApp({
     credential: cert(serviceAccount),
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
   });
 }
-
-const db = getFirestore(getAdminApp());
-const adminAuth = getAdminAuth(getAdminApp());
 
 export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   const { id } = params;
-  const authorization = req.headers.get('Authorization');
-
-  if (!authorization?.startsWith('Bearer ')) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  const idToken = authorization.split('Bearer ')[1];
-
-  let decodedToken;
+  
   try {
-    decodedToken = await adminAuth.verifyIdToken(idToken);
-  } catch (error) {
-    console.error('Error verifying token:', error);
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+    const db = getFirestore(getAdminApp());
+    const adminAuth = getAdminAuth(getAdminApp());
+    const authorization = req.headers.get('Authorization');
 
-  const { uid } = decodedToken;
+    if (!authorization?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const idToken = authorization.split('Bearer ')[1];
+  
+    let decodedToken;
+    try {
+      decodedToken = await adminAuth.verifyIdToken(idToken);
+    } catch (error) {
+      console.error('Error verifying token:', error);
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+  
+    const { uid } = decodedToken;
 
-  try {
     const docRef = db.collection('posts').doc(id);
     const docSnap = await docRef.get();
 
@@ -61,8 +64,8 @@ export async function DELETE(
     await docRef.delete();
 
     return NextResponse.json({ success: true, id });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting post:', error);
-    return NextResponse.json({ error: 'Failed to delete post.' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Failed to delete post.' }, { status: 500 });
   }
 }

@@ -9,46 +9,49 @@ function getAdminApp(): App {
     return getApp();
   }
 
+  if (!process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+    throw new Error('Firebase service account key is not set.');
+  }
+
   const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY as string);
 
   return initializeApp({
     credential: cert(serviceAccount),
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
   });
 }
-
-const db = getFirestore(getAdminApp());
-const adminAuth = getAdminAuth(getAdminApp());
 
 export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   const { id: commentId } = params;
-  const { postId } = await req.json();
-
-  if (!postId) {
-    return NextResponse.json({ error: 'Post ID is required' }, { status: 400 });
-  }
-
-  const authorization = req.headers.get('Authorization');
-
-  if (!authorization?.startsWith('Bearer ')) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  const idToken = authorization.split('Bearer ')[1];
-
-  let decodedToken;
-  try {
-    decodedToken = await adminAuth.verifyIdToken(idToken);
-  } catch (error) {
-    console.error('Error verifying token:', error);
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const { uid } = decodedToken;
 
   try {
+    const db = getFirestore(getAdminApp());
+    const adminAuth = getAdminAuth(getAdminApp());
+    const { postId } = await req.json();
+    
+    if (!postId) {
+      return NextResponse.json({ error: 'Post ID is required' }, { status: 400 });
+    }
+  
+    const authorization = req.headers.get('Authorization');
+  
+    if (!authorization?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const idToken = authorization.split('Bearer ')[1];
+  
+    let decodedToken;
+    try {
+      decodedToken = await adminAuth.verifyIdToken(idToken);
+    } catch (error) {
+      console.error('Error verifying token:', error);
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+  
+    const { uid } = decodedToken;
+
     const docRef = db.collection('posts').doc(postId).collection('comments').doc(commentId);
     const docSnap = await docRef.get();
 
@@ -67,8 +70,8 @@ export async function DELETE(
     await docRef.delete();
 
     return NextResponse.json({ success: true, id: commentId });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting comment:', error);
-    return NextResponse.json({ error: 'Failed to delete comment.' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Failed to delete comment.' }, { status: 500 });
   }
 }

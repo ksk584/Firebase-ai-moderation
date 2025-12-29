@@ -13,16 +13,16 @@ function getAdminApp(): App {
     return getApp();
   }
 
+  if (!process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+    throw new Error('Firebase service account key is not set.');
+  }
+
   const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY as string);
   
   return initializeApp({
     credential: cert(serviceAccount),
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
   });
 }
-
-const db = getFirestore(getAdminApp());
-const adminAuth = getAdminAuth(getAdminApp());
 
 export const config = {
   api: {
@@ -33,28 +33,31 @@ export const config = {
 }
 
 export async function POST(req: NextRequest) {
-  const authorization = req.headers.get('Authorization');
-  if (!authorization?.startsWith('Bearer ')) {
-    return NextResponse.json({error: 'Unauthorized'}, {status: 401});
-  }
-  const idToken = authorization.split('Bearer ')[1];
-
-  let decodedToken;
   try {
-    decodedToken = await adminAuth.verifyIdToken(idToken);
-  } catch (error) {
-    console.error('Error verifying token:', error);
-    return NextResponse.json({error: 'Unauthorized'}, {status: 401});
-  }
+    const db = getFirestore(getAdminApp());
+    const adminAuth = getAdminAuth(getAdminApp());
 
-  const {uid, email} = decodedToken;
-  const {content, imageUrl} = await req.json();
+    const authorization = req.headers.get('Authorization');
+    if (!authorization?.startsWith('Bearer ')) {
+      return NextResponse.json({error: 'Unauthorized'}, {status: 401});
+    }
+    const idToken = authorization.split('Bearer ')[1];
 
-  if (!content || !content.trim()) {
-    return NextResponse.json({error: 'Content cannot be empty.'}, {status: 400});
-  }
+    let decodedToken;
+    try {
+      decodedToken = await adminAuth.verifyIdToken(idToken);
+    } catch (error) {
+      console.error('Error verifying token:', error);
+      return NextResponse.json({error: 'Unauthorized'}, {status: 401});
+    }
 
-  try {
+    const {uid, email} = decodedToken;
+    const {content, imageUrl} = await req.json();
+
+    if (!content || !content.trim()) {
+      return NextResponse.json({error: 'Content cannot be empty.'}, {status: 400});
+    }
+
     // If imageUrl is null, pass undefined to the moderation flow so it's excluded from the payload.
     const moderationResult = await moderatePost({ content, imageUrl: imageUrl || undefined });
 
@@ -82,8 +85,8 @@ export async function POST(req: NextRequest) {
 
     // Revalidation is handled on the client-side after a successful post.
     return NextResponse.json({success: true, id: docRef.id});
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating post:', error);
-    return NextResponse.json({error: 'Failed to create post.'}, {status: 500});
+    return NextResponse.json({error: error.message || 'Failed to create post.'}, {status: 500});
   }
 }
