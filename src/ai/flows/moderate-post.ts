@@ -12,7 +12,7 @@ import {z} from 'genkit';
 
 const ModeratePostInputSchema = z.object({
   content: z.string().describe('The text content of the post to be moderated.'),
-  imageUrl: z.string().optional().describe(
+  imageUrl: z.string().nullable().optional().describe(
     "An optional image attached to the post, as a data URI. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
   ),
 });
@@ -48,7 +48,7 @@ const prompt = ai.definePrompt({
   - Nudity or sexual content
   
   Post Text: {{{content}}}
-  {{#if imageUrl}}
+  {{#if (ne imageUrl null)}}
   Post Image: {{media url=imageUrl}}
   {{/if}}
 
