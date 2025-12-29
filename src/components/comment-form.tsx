@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from './ui/input';
 import { SendHorizonal, X, Paperclip } from 'lucide-react';
 import { useAuth } from './auth-provider';
+import { moderatePost } from '@/ai/flows/moderate-post';
 
 const formSchema = z.object({
   content: z.string().min(1, 'Comment cannot be empty').max(280, 'Comment cannot exceed 280 characters'),
@@ -74,6 +75,15 @@ export function CommentForm({ postId }: CommentFormProps) {
     
     setIsSubmitting(true);
     try {
+        const moderationResult = await moderatePost({
+            content: values.content,
+            imageUrl: imagePreview || null,
+        });
+
+        if (moderationResult.offensive) {
+            throw new Error(`Comment rejected by moderation: ${moderationResult.reason}`);
+        }
+        
         const commentData = {
           content: values.content,
           imageUrl: imagePreview || null,
@@ -96,7 +106,7 @@ export function CommentForm({ postId }: CommentFormProps) {
     } catch (error: any) {
          toast({
             variant: 'destructive',
-            title: 'Error',
+            title: 'Error creating comment',
             description: error.message || 'Could not create comment.',
         });
     } finally {

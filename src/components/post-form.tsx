@@ -16,8 +16,7 @@ import { Input } from './ui/input';
 import { SendHorizonal, X } from 'lucide-react';
 import { useAuth } from './auth-provider';
 import { cn } from '@/lib/utils';
-// Note: We are temporarily removing AI moderation to fix core functionality.
-// import { moderatePost } from '@/ai/flows/moderate-post';
+import { moderatePost } from '@/ai/flows/moderate-post';
 
 const formSchema = z.object({
   content: z.string().min(1, 'Post cannot be empty').max(1000, 'Post cannot exceed 1000 characters'),
@@ -77,17 +76,14 @@ export function PostForm({ onPostSuccess }: PostFormProps) {
     
     setIsSubmitting(true);
     try {
-        /*
-        // AI moderation temporarily disabled
         const moderationResult = await moderatePost({ 
           content: values.content, 
-          imageUrl: imagePreview || undefined 
+          imageUrl: imagePreview || null
         });
 
         if (moderationResult.offensive) {
           throw new Error(`Post rejected by moderation: ${moderationResult.reason}`);
         }
-        */
 
         const postData = {
           content: values.content,
