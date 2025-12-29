@@ -4,7 +4,7 @@
 import { Feed } from '@/components/feed';
 import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { PostForm } from '@/components/post-form';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
