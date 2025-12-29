@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Header } from '@/components/header';
 import type { Post } from '@/lib/types';
@@ -10,11 +10,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, User, Ban, Flag } from 'lucide-react';
+import { ArrowLeft, Ban, Flag } from 'lucide-react';
 import { PostCard } from '@/components/post-card';
 import { useAuth } from '@/components/auth-provider';
 import { ReportUserDialog } from '@/components/report-user-dialog';
 import { useBlocklist } from '@/hooks/use-blocklist';
+import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { Timestamp } from 'firebase/firestore';
 
 export default function ProfilePage() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -25,16 +27,14 @@ export default function ProfilePage() {
   const params = useParams();
   const { id: authorId } = params;
   const { toast } = useToast();
-  const { user } = useAuth();
-  const router = useRouter();
+  const { user, db } = useAuth();
   const { blocklist, addBlock, removeBlock } = useBlocklist();
 
   const isBlocked = authorId && typeof authorId === 'string' && blocklist.includes(authorId);
 
   useEffect(() => {
-    if (!authorId || typeof authorId !== 'string') {
-      setError('Invalid user ID.');
-      setLoading(false);
+    if (!authorId || typeof authorId !== 'string' || !db) {
+      if(!db) setLoading(false);
       return;
     }
 
@@ -42,19 +42,41 @@ export default function ProfilePage() {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`/api/actions/get-user-posts/${authorId}`);
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to fetch user posts.');
-        }
-        const postData = await response.json();
+        const postsQuery = query(
+            collection(db, 'posts'), 
+            where('authorId', '==', authorId), 
+            orderBy('createdAt', 'desc')
+        );
+
+        const querySnapshot = await getDocs(postsQuery);
+        
+        const postData = querySnapshot.docs.map(doc => {
+            const data = doc.data();
+            const createdAt = data.createdAt;
+            let serializableCreatedAt: string;
+
+            if (createdAt instanceof Timestamp) {
+                serializableCreatedAt = createdAt.toDate().toISOString();
+            } else if (createdAt && typeof createdAt.seconds === 'number') {
+                serializableCreatedAt = new Date(createdAt.seconds * 1000).toISOString();
+            } else {
+                serializableCreatedAt = new Date().toISOString();
+            }
+
+            return {
+                id: doc.id,
+                ...data,
+                createdAt: serializableCreatedAt,
+            } as Post;
+        });
+
         setPosts(postData);
+
         if (postData.length > 0) {
           setAuthorInfo({ email: postData[0].authorEmail, id: postData[0].authorId });
         } else {
-            // If the user has no posts, we can't get their email. 
-            // This is a limitation of the current anonymous data structure.
-            // We'll just show their ID.
+            // This is a bit of a hack. We can't get the user's email if they have no posts.
+            // A better solution would be to have a 'users' collection.
             setAuthorInfo({ email: 'Anonymous', id: authorId });
         }
       } catch (err: any) {
@@ -70,11 +92,11 @@ export default function ProfilePage() {
     };
 
     fetchUserPosts();
-  }, [authorId, toast]);
+  }, [authorId, toast, db]);
 
   const getUsername = (email?: string) => {
     if (!email || email === 'Anonymous') return 'Anonymous';
-    return email.substring(0, 5);
+    return email.split('@')[0];
   };
 
   const getInitials = (email?: string) => {

@@ -10,20 +10,19 @@ import { Button } from './ui/button';
 import { MessageCircle, Trash2, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useAuth } from './auth-provider';
 import { useToast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
 import { ReportPostDialog } from './report-post-dialog';
 import Image from 'next/image';
 import { Dialog, DialogContent, DialogTrigger } from './ui/dialog';
 import { useState } from 'react';
+import { doc, deleteDoc } from 'firebase/firestore';
 
 interface PostCardProps {
   post: Post;
 }
 
 export function PostCard({ post }: PostCardProps) {
-  const { user } = useAuth();
+  const { user, db } = useAuth();
   const { toast } = useToast();
-  const router = useRouter();
   const [likes, setLikes] = useState(0);
   const [dislikes, setDislikes] = useState(0);
   const [userVote, setUserVote] = useState<'like' | 'dislike' | null>(null);
@@ -35,31 +34,20 @@ export function PostCard({ post }: PostCardProps) {
 
   const getUsername = (email?: string) => {
     if (!email) return 'Anonymous';
-    return email.substring(0, 5);
+    return email.split('@')[0];
   };
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    if (!user) return;
+    if (!user || !db) return;
     try {
-      const idToken = await user.getIdToken();
-      const response = await fetch(`/api/actions/delete-post/${post.id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-        },
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to delete post.');
-      }
+      await deleteDoc(doc(db, 'posts', post.id));
       toast({
         title: 'Success',
         description: 'Post deleted successfully.',
       });
-      router.refresh();
+      // The real-time listener in the Feed component will handle the UI update.
     } catch (error: any) {
       toast({
         variant: 'destructive',
@@ -161,7 +149,7 @@ export function PostCard({ post }: PostCardProps) {
         </div>
         <div className="flex items-center gap-1 sm:gap-2">
             {post.createdAt ? (
-                <p className="hidden sm:block">{formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}</p>
+                <p className="hidden sm:block">{formatDistanceToNow(new Date(post.createdAt as string), { addSuffix: true })}</p>
             ) : (
                 <p className="hidden sm:block">just now</p>
             )}

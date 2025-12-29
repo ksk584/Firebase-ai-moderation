@@ -12,7 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, MessageCircle, Trash2 } from 'lucide-react';
+import { ArrowLeft, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/components/auth-provider';
 import { ReportPostDialog } from '@/components/report-post-dialog';
@@ -20,6 +20,7 @@ import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { CommentList } from '@/components/comment-list';
 import { CommentForm } from '@/components/comment-form';
+import { doc, getDoc, deleteDoc } from 'firebase/firestore';
 
 export default function PostPage() {
   const [post, setPost] = useState<Post | null>(null);
@@ -28,23 +29,39 @@ export default function PostPage() {
   const params = useParams();
   const { id } = params;
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, db } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!id || typeof id !== 'string') return;
+    if (!id || typeof id !== 'string' || !db) return;
 
     const fetchPost = async () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`/api/actions/get-post/${id}`);
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to fetch post.');
+        const docRef = doc(db, 'posts', id);
+        const docSnap = await getDoc(docRef);
+
+        if (!docSnap.exists()) {
+          throw new Error('Post not found.');
         }
-        const postData = await response.json();
-        setPost(postData);
+        
+        const postData = docSnap.data();
+        const createdAt = postData.createdAt;
+        let serializableCreatedAt: string;
+
+        if (createdAt && typeof createdAt.seconds === 'number') {
+            serializableCreatedAt = new Date(createdAt.seconds * 1000).toISOString();
+        } else {
+            serializableCreatedAt = new Date().toISOString();
+        }
+
+        setPost({
+          id: docSnap.id,
+          ...postData,
+          createdAt: serializableCreatedAt,
+        } as Post);
+
       } catch (err: any) {
         setError(err.message);
         toast({
@@ -58,11 +75,11 @@ export default function PostPage() {
     };
 
     fetchPost();
-  }, [id, toast]);
+  }, [id, toast, db]);
 
   const getUsername = (email?: string) => {
     if (!email) return 'Anonymous';
-    return email.substring(0, 5);
+    return email.split('@')[0];
   };
 
   const getInitials = (email?: string) => {
@@ -73,20 +90,9 @@ export default function PostPage() {
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    if (!user || !post) return;
+    if (!user || !post || !db) return;
     try {
-      const idToken = await user.getIdToken();
-      const response = await fetch(`/api/actions/delete-post/${post.id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-        },
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to delete post.');
-      }
+      await deleteDoc(doc(db, 'posts', post.id));
       toast({
         title: 'Success',
         description: 'Post deleted successfully.',

@@ -5,8 +5,8 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -15,7 +15,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from './ui/input';
 import { SendHorizonal, X, Paperclip } from 'lucide-react';
 import { useAuth } from './auth-provider';
-import { cn } from '@/lib/utils';
 
 const formSchema = z.object({
   content: z.string().min(1, 'Comment cannot be empty').max(280, 'Comment cannot exceed 280 characters'),
@@ -30,8 +29,7 @@ export function CommentForm({ postId }: CommentFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const { toast } = useToast();
-  const { user } = useAuth();
-  const router = useRouter();
+  const { user, db } = useAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -43,11 +41,11 @@ export function CommentForm({ postId }: CommentFormProps) {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) { // 2MB limit
+      if (file.size > 4 * 1024 * 1024) { // 4MB limit for base64
         toast({
           variant: 'destructive',
           title: 'Image too large',
-          description: 'Please select an image smaller than 2MB.',
+          description: 'Please select an image smaller than 4MB.',
         });
         return;
       }
@@ -65,7 +63,7 @@ export function CommentForm({ postId }: CommentFormProps) {
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!user) {
+    if (!user || !db) {
       toast({
         variant: 'destructive',
         title: 'Error',
@@ -76,27 +74,17 @@ export function CommentForm({ postId }: CommentFormProps) {
     
     setIsSubmitting(true);
     try {
-        const idToken = await user.getIdToken();
-        
-        const body = {
+        const commentData = {
           content: values.content,
-          imageUrl: imagePreview,
+          imageUrl: imagePreview || null,
           postId,
+          authorId: user.uid,
+          authorEmail: user.email || 'Anonymous',
+          createdAt: serverTimestamp(),
         };
 
-        const response = await fetch('/api/actions/create-comment', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${idToken}`,
-          },
-          body: JSON.stringify(body),
-        });
-
-        if (!response.ok) {
-            const data = await response.json();
-            throw new Error(data.error || 'Failed to create comment.');
-        }
+        const commentsColRef = collection(db, 'posts', postId, 'comments');
+        await addDoc(commentsColRef, commentData);
 
         form.reset();
         setImagePreview(null);
@@ -105,8 +93,6 @@ export function CommentForm({ postId }: CommentFormProps) {
           description: 'Your comment has been posted.',
         });
         
-        // No router.refresh() needed because CommentList uses a real-time listener
-
     } catch (error: any) {
          toast({
             variant: 'destructive',

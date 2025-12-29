@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot, Timestamp } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, Timestamp, doc, deleteDoc } from 'firebase/firestore';
 import { useAuth } from './auth-provider';
 import type { Comment } from '@/lib/types';
 import { Skeleton } from './ui/skeleton';
@@ -79,31 +79,18 @@ export function CommentList({ postId }: CommentListProps) {
 
     const getUsername = (email?: string) => {
         if (!email) return 'Anonymous';
-        return email.substring(0, 5);
+        return email.split('@')[0];
     };
 
   const handleDelete = async (comment: Comment) => {
-    if (!user) return;
+    if (!user || !db) return;
     try {
-      const idToken = await user.getIdToken();
-      const response = await fetch(`/api/actions/delete-comment/${comment.id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${idToken}`,
-        },
-        body: JSON.stringify({ postId: comment.postId }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to delete comment.');
-      }
+      const commentRef = doc(db, 'posts', comment.postId, 'comments', comment.id);
+      await deleteDoc(commentRef);
       toast({
         title: 'Success',
         description: 'Comment deleted successfully.',
       });
-      // Real-time listener will update the UI
     } catch (error: any) {
       toast({
         variant: 'destructive',
