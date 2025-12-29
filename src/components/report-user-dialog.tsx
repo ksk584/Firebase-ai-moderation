@@ -16,6 +16,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from './auth-provider';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 
 interface ReportUserDialogProps {
   author: { id: string; email: string };
@@ -35,10 +37,22 @@ export function ReportUserDialog({ author, children }: ReportUserDialogProps) {
   const [selectedReason, setSelectedReason] = useState<string | null>(null);
   const [otherReason, setOtherReason] = useState('');
   const { toast } = useToast();
+  const { user, db } = useAuth();
 
-  const handleReport = (e: React.MouseEvent) => {
+
+  const handleReport = async (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
+
+     if (!user || !db) {
+        toast({
+            variant: 'destructive',
+            title: 'Authentication Error',
+            description: 'You must be logged in to report content.',
+        });
+        return;
+    }
+
     if (!selectedReason) {
         toast({
             variant: 'destructive',
@@ -57,17 +71,32 @@ export function ReportUserDialog({ author, children }: ReportUserDialogProps) {
         return;
     }
 
-    // Here you would typically send the report to your backend
-    console.log('Reporting user:', author.id);
-    console.log('Reason:', selectedReason === 'other' ? otherReason : selectedReason);
+    try {
+        await addDoc(collection(db, 'reports'), {
+            type: 'user',
+            reportedId: author.id,
+            reportedAuthorEmail: author.email,
+            reporterId: user.uid,
+            reason: selectedReason,
+            otherReason: selectedReason === 'other' ? otherReason : '',
+            createdAt: serverTimestamp(),
+        });
 
-    toast({
-      title: 'User Reported',
-      description: 'Thank you for your feedback. We will review this user profile.',
-    });
-    setOpen(false);
-    setSelectedReason(null);
-    setOtherReason('');
+        toast({
+        title: 'User Reported',
+        description: 'Thank you for your feedback. We will review this user profile.',
+        });
+        setOpen(false);
+        setSelectedReason(null);
+        setOtherReason('');
+
+    } catch(error: any) {
+        toast({
+            variant: 'destructive',
+            title: 'Reporting Failed',
+            description: error.message || 'Could not submit report.',
+        });
+    }
   };
   
   const onOpenChange = (isOpen: boolean) => {
