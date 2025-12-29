@@ -4,7 +4,7 @@
 import { Feed } from '@/components/feed';
 import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { PostForm } from '@/components/post-form';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
@@ -43,6 +43,9 @@ export default function Home() {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Share a thought</DialogTitle>
+            <DialogDescription>
+              Create a new post to share with the community. You can include an image.
+            </DialogDescription>
           </DialogHeader>
           {/* By passing a callback to close the dialog on success, we don't need to import the dialog context into the form */}
           <PostForm onPostSuccess={() => setIsDialogOpen(false)} />
