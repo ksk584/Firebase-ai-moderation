@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const moderationResult = await moderatePost({ content });
+    const moderationResult = await moderatePost({ content, imageUrl });
 
     if (moderationResult.offensive) {
       // Store the offensive post and reason in a separate collection

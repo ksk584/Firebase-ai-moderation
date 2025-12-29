@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const moderationResult = await moderatePost({ content });
+    const moderationResult = await moderatePost({ content, imageUrl });
 
     if (moderationResult.offensive) {
       // We are just rejecting it, but you could also store it for review.
