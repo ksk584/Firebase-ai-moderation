@@ -33,7 +33,7 @@ const reportReasons = [
 ];
 
 export function ReportUserDialog({ author, children }: ReportUserDialogProps) {
-  const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [selectedReason, setSelectedReason] = useState<string | null>(null);
   const [otherReason, setOtherReason] = useState('');
   const { toast } = useToast();
@@ -86,7 +86,7 @@ export function ReportUserDialog({ author, children }: ReportUserDialogProps) {
         title: 'User Reported',
         description: 'Thank you for your feedback. We will review this user profile.',
         });
-        setOpen(false);
+        setIsOpen(false);
         setSelectedReason(null);
         setOtherReason('');
 
@@ -99,17 +99,17 @@ export function ReportUserDialog({ author, children }: ReportUserDialogProps) {
     }
   };
   
-  const onOpenChange = (isOpen: boolean) => {
-    if (!isOpen) {
+  const onOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (!open) {
       setSelectedReason(null);
       setOtherReason('');
     }
-    setOpen(isOpen);
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild onClick={(e) => e.stopPropagation()}>{children}</DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogTrigger asChild onClick={(e) => { e.stopPropagation(); e.preventDefault(); setIsOpen(true); }}>{children}</DialogTrigger>
       <DialogContent
         onClick={(e) => e.stopPropagation()}
         className="sm:max-w-[425px]"
