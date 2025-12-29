@@ -11,6 +11,9 @@ import { Avatar, AvatarFallback } from './ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
 import Image from 'next/image';
 import { Dialog, DialogContent, DialogTrigger } from './ui/dialog';
+import { Button } from './ui/button';
+import { Trash2 } from 'lucide-react';
+import { ReportCommentDialog } from './report-comment-dialog';
 
 interface CommentListProps {
     postId: string;
@@ -20,7 +23,7 @@ export function CommentList({ postId }: CommentListProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-  const { db } = useAuth();
+  const { user, db } = useAuth();
 
   useEffect(() => {
     if (!db || !postId) {
@@ -74,6 +77,37 @@ export function CommentList({ postId }: CommentListProps) {
         if (!email) return 'Anonymous';
         return email.substring(0, 5);
     };
+
+  const handleDelete = async (comment: Comment) => {
+    if (!user) return;
+    try {
+      const idToken = await user.getIdToken();
+      const response = await fetch(`/api/actions/delete-comment/${comment.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({ postId: comment.postId }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to delete comment.');
+      }
+      toast({
+        title: 'Success',
+        description: 'Comment deleted successfully.',
+      });
+      // Real-time listener will update the UI
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message,
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -137,6 +171,19 @@ export function CommentList({ postId }: CommentListProps) {
                             </Dialog>
                         )}
                     </div>
+                     <div className="flex items-center gap-2 -ml-2">
+                        <ReportCommentDialog comment={comment}>
+                          <Button variant="ghost" size="sm">
+                            Report
+                          </Button>
+                        </ReportCommentDialog>
+                        {user && user.uid === comment.authorId && (
+                            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => handleDelete(comment)}>
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                            </Button>
+                        )}
+                    </div>
                 </div>
             </div>
         ))
@@ -148,4 +195,3 @@ export function CommentList({ postId }: CommentListProps) {
     </div>
   );
 }
-
