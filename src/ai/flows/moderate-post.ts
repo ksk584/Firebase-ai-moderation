@@ -48,7 +48,7 @@ const prompt = ai.definePrompt({
   - Nudity or sexual content
   
   Post Text: {{{content}}}
-  {{#if (ne imageUrl null)}}
+  {{#if imageUrl}}
   Post Image: {{media url=imageUrl}}
   {{/if}}
 
