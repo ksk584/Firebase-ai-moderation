@@ -52,7 +52,8 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const moderationResult = await moderatePost({ content, imageUrl });
+    // If imageUrl is null, pass undefined to the moderation flow so it's excluded from the payload.
+    const moderationResult = await moderatePost({ content, imageUrl: imageUrl || undefined });
 
     if (moderationResult.offensive) {
       // Store the offensive post and reason in a separate collection
