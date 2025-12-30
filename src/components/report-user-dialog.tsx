@@ -33,7 +33,6 @@ const reportReasons = [
 ];
 
 export function ReportUserDialog({ author, children }: ReportUserDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
   const [selectedReason, setSelectedReason] = useState<string | null>(null);
   const [otherReason, setOtherReason] = useState('');
   const { toast } = useToast();
@@ -77,18 +76,21 @@ export function ReportUserDialog({ author, children }: ReportUserDialogProps) {
             reportedId: author.id,
             reportedAuthorEmail: author.email,
             reporterId: user.uid,
+            reporterEmail: user.email,
             reason: selectedReason,
             otherReason: selectedReason === 'other' ? otherReason : '',
             createdAt: serverTimestamp(),
         });
 
         toast({
-        title: 'User Reported',
-        description: 'Thank you for your feedback. We will review this user profile.',
+            title: 'User Reported',
+            description: 'Thank you for your feedback. We will review this user profile.',
         });
-        setIsOpen(false);
+        
         setSelectedReason(null);
         setOtherReason('');
+        const closeButton = document.getElementById(`close-report-user-${author.id}`);
+        closeButton?.click();
 
     } catch(error: any) {
         toast({
@@ -99,17 +101,14 @@ export function ReportUserDialog({ author, children }: ReportUserDialogProps) {
     }
   };
   
-  const onOpenChange = (open: boolean) => {
-    setIsOpen(open);
-    if (!open) {
-      setSelectedReason(null);
-      setOtherReason('');
-    }
-  }
-
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild onClick={(e) => { e.stopPropagation(); e.preventDefault(); setIsOpen(true); }}>{children}</DialogTrigger>
+    <Dialog onOpenChange={(open) => {
+      if (!open) {
+        setSelectedReason(null);
+        setOtherReason('');
+      }
+    }}>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent
         onClick={(e) => e.stopPropagation()}
         className="sm:max-w-[425px]"
@@ -144,7 +143,7 @@ export function ReportUserDialog({ author, children }: ReportUserDialogProps) {
         </div>
         <DialogFooter>
           <DialogClose asChild>
-             <Button variant="ghost" onClick={(e) => e.stopPropagation()}>Cancel</Button>
+             <Button id={`close-report-user-${author.id}`} variant="ghost" onClick={(e) => e.stopPropagation()}>Cancel</Button>
           </DialogClose>
           <Button onClick={handleReport}>Submit Report</Button>
         </DialogFooter>
