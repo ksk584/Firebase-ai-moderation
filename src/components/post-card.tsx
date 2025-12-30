@@ -154,7 +154,7 @@ export function PostCard({ post }: PostCardProps) {
                 <p className="hidden sm:block">just now</p>
             )}
              <ReportPostDialog post={post}>
-              <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}>
+              <Button variant="ghost" size="sm">
                 Report
               </Button>
             </ReportPostDialog>

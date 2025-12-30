@@ -194,7 +194,7 @@ export default function PostPage() {
                 <p>just now</p>
               )}
                <ReportPostDialog post={post}>
-                <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}>
+                <Button variant="ghost" size="sm">
                   Report
                 </Button>
               </ReportPostDialog>

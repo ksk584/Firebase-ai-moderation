@@ -90,12 +90,8 @@ export function ReportPostDialog({ post, children }: ReportPostDialogProps) {
             description: 'Thank you for your feedback. We will review this post.',
         });
 
-        // Close dialog by resetting state, as direct control is removed
         setSelectedReason(null);
         setOtherReason('');
-        // NOTE: This won't close the dialog, but DialogClose will.
-        // For a fully controlled component, you'd lift state up.
-        // But for this simple case, we let the trigger/close manage it.
         const closeButton = document.getElementById(`close-report-post-${post.id}`);
         closeButton?.click();
 

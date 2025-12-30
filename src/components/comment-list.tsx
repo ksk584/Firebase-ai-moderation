@@ -168,7 +168,7 @@ export function CommentList({ postId }: CommentListProps) {
                     </div>
                      <div className="flex items-center gap-2 -ml-2">
                         <ReportCommentDialog comment={comment}>
-                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}>
+                          <Button variant="ghost" size="sm">
                             Report
                           </Button>
                         </ReportCommentDialog>

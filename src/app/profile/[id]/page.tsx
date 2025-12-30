@@ -77,7 +77,7 @@ export default function ProfilePage() {
         } else {
             // This is a bit of a hack. We can't get the user's email if they have no posts.
             // A better solution would be to have a 'users' collection.
-            setAuthorInfo({ email: 'Anonymous', id: authorId });
+            setAuthorInfo({ email: 'Anonymous', id: authorId as string });
         }
       } catch (err: any) {
         setError(err.message);
@@ -168,13 +168,13 @@ export default function ProfilePage() {
             <h1 className="text-3xl font-bold">{getUsername(authorInfo?.email)}</h1>
             <p className="text-muted-foreground break-all">User ID: {authorId}</p>
           </div>
-          {user && user.uid !== authorId && (
+          {user && user.uid !== authorId && authorInfo && (
             <div className="flex flex-col sm:flex-row gap-2">
               <Button onClick={handleBlockToggle} variant={isBlocked ? 'default' : 'outline'}>
                 <Ban className="mr-2 h-4 w-4" />
                 {isBlocked ? 'Unblock' : 'Block'}
               </Button>
-              <ReportUserDialog author={profileAuthor}>
+              <ReportUserDialog author={authorInfo}>
                 <Button variant="outline">
                   <Flag className="mr-2 h-4 w-4" />
                   Report User
