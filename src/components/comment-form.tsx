@@ -75,14 +75,14 @@ export function CommentForm({ postId }: CommentFormProps) {
     
     setIsSubmitting(true);
     try {
-        const moderationResult = await moderatePost({
-            content: values.content,
-            imageUrl: imagePreview || null,
-        });
+        // const moderationResult = await moderatePost({
+        //     content: values.content,
+        //     imageUrl: imagePreview || null,
+        // });
 
-        if (moderationResult.offensive) {
-            throw new Error(`Comment rejected by moderation: ${moderationResult.reason}`);
-        }
+        // if (moderationResult.offensive) {
+        //     throw new Error(`Comment rejected by moderation: ${moderationResult.reason}`);
+        // }
         
         const commentData = {
           content: values.content,

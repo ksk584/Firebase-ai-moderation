@@ -76,14 +76,14 @@ export function PostForm({ onPostSuccess }: PostFormProps) {
     
     setIsSubmitting(true);
     try {
-        const moderationResult = await moderatePost({ 
-          content: values.content, 
-          imageUrl: imagePreview || null
-        });
+        // const moderationResult = await moderatePost({ 
+        //   content: values.content, 
+        //   imageUrl: imagePreview || null
+        // });
 
-        if (moderationResult.offensive) {
-          throw new Error(`Post rejected by moderation: ${moderationResult.reason}`);
-        }
+        // if (moderationResult.offensive) {
+        //   throw new Error(`Post rejected by moderation: ${moderationResult.reason}`);
+        // }
 
         const postData = {
           content: values.content,
