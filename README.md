@@ -12,13 +12,10 @@ This is a Next.js application built with Firebase for real-time updates and auth
 
 ## Getting Started
 
-First, set up your environment variables. Create a `.env.local` file in the root of the project by copying the `.env.example` file:
+First, set up your configuration in `src/lib/config.ts`. Open this file and replace the placeholder values for your Firebase project.
 
-```bash
-cp .env.example .env.local
-```
+You can find your Firebase configuration in your project's settings in the Firebase console. The Google API key has been pre-filled for you, but you may need to refresh it at [Google AI Studio](https://aistudio.google.com/app/apikey) if you encounter rate limits.
 
-Then, fill in your Firebase project configuration and Google API key in `.env.local`. You can find your Firebase configuration in your project's settings in the Firebase console. You can get a Google API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
 
 Next, enable Authentication (Email/Password and Google sign-in) and Firestore in your Firebase project. Create a collection named `posts`.
 
