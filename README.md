@@ -14,8 +14,7 @@ This is a Next.js application built with Firebase for real-time updates and auth
 
 First, set up your configuration in `src/lib/config.ts`. Open this file and replace the placeholder values for your Firebase project.
 
-You can find your Firebase configuration in your project's settings in the Firebase console. The Google API key has been pre-filled for you, but you may need to refresh it at [Google AI Studio](https://aistudio.google.com/app/apikey) if you encounter rate limits.
-
+You can find your Firebase configuration in your project's settings in the Firebase console.
 
 Next, enable Authentication (Email/Password and Google sign-in) and Firestore in your Firebase project. Create a collection named `posts`.
 

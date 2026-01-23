@@ -4,6 +4,14 @@
 
 import type { FirebaseOptions } from "firebase/app";
 
+// -----------------------------------------------------------------------------
+// PLEASE UPDATE THIS WITH YOUR FIREBASE PROJECT'S CONFIGURATION
+// -----------------------------------------------------------------------------
+// 1. Go to your Firebase project's settings: 
+//    https://console.firebase.google.com/project/aimod/settings/general/
+// 2. In the "Your apps" card, find your web app.
+// 3. Copy the config object and paste the values here.
+// -----------------------------------------------------------------------------
 export const firebaseConfig: FirebaseOptions = {
   apiKey: "REPLACE_WITH_YOUR_FIREBASE_API_KEY",
   authDomain: "REPLACE_WITH_YOUR_FIREBASE_AUTH_DOMAIN",
