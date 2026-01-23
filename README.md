@@ -18,9 +18,9 @@ First, set up your environment variables. Create a `.env.local` file in the root
 cp .env.example .env.local
 ```
 
-Then, add your Firebase project configuration and Google API key to `.env.local`.
+Then, fill in your Firebase project configuration and Google API key in `.env.local`. You can find your Firebase configuration in your project's settings in the Firebase console. You can get a Google API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
 
-Next, enable Authentication (Anonymous sign-in) and Firestore in your Firebase project. Create a collection named `posts`.
+Next, enable Authentication (Email/Password and Google sign-in) and Firestore in your Firebase project. Create a collection named `posts`.
 
 Then, run the development server:
 

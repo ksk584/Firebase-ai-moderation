@@ -16,7 +16,7 @@ export function Header() {
   return (
     <header className="bg-card border-b">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <div className="text-lg font-bold text-primary">SafeSocial</div>
+        <div className="text-lg font-bold text-primary">AnonVerse</div>
         <div className="flex items-center gap-4">
           {user && (
             <span className="text-sm text-muted-foreground hidden sm:inline">{user.email}</span>

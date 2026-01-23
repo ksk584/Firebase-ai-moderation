@@ -5,8 +5,8 @@ import { AuthProvider } from '@/components/auth-provider';
 import { ThemeProvider } from '@/components/theme-provider';
 
 export const metadata: Metadata = {
-  title: 'SafeSocial',
-  description: 'Share your thoughts safely.',
+  title: 'AnonVerse',
+  description: 'Share your thoughts anonymously.',
 };
 
 export default function RootLayout({
