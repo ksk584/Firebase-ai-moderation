@@ -1,24 +1,15 @@
-// TODO: Add your Firebase and Gemini API Keys here
-// You can get your Firebase config from your project's settings in the Firebase console.
-// You can get a Google API key from Google AI Studio (https://aistudio.google.com/app/apikey).
-
 import type { FirebaseOptions } from "firebase/app";
 
 // -----------------------------------------------------------------------------
-// PLEASE UPDATE THIS WITH YOUR FIREBASE PROJECT'S CONFIGURATION
-// -----------------------------------------------------------------------------
-// 1. Go to your Firebase project's settings: 
-//    https://console.firebase.google.com/project/aimod/settings/general/
-// 2. In the "Your apps" card, find your web app.
-// 3. Copy the config object and paste the values here.
+// Firebase Project Configuration
 // -----------------------------------------------------------------------------
 export const firebaseConfig: FirebaseOptions = {
-  apiKey: "REPLACE_WITH_YOUR_FIREBASE_API_KEY",
-  authDomain: "REPLACE_WITH_YOUR_FIREBASE_AUTH_DOMAIN",
-  projectId: "REPLACE_WITH_YOUR_FIREBASE_PROJECT_ID",
-  storageBucket: "REPLACE_WITH_YOUR_FIREBASE_STORAGE_BUCKET",
-  messagingSenderId: "REPLACE_WITH_YOUR_FIREBASE_MESSAGING_SENDER_ID",
-  appId: "REPLACE_WITH_YOUR_FIREBASE_APP_ID",
+  apiKey: "AIzaSyC8KaaaFGNaTiB67fctUPSQnapjVCbeGQ8",
+  authDomain: "studio-7165806079-bb61f.firebaseapp.com",
+  projectId: "studio-7165806079-bb61f",
+  storageBucket: "studio-7165806079-bb61f.appspot.com",
+  messagingSenderId: "728995885616",
+  appId: "1:728995885616:web:b1a65d8d571ad68f7ab3f5",
 };
 
 export const geminiApiKey = "AIzaSyB8t6kGf0OsJAM21I6esqlXAe6ayGlqneg";
