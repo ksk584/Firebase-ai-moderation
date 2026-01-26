@@ -21,13 +21,6 @@ This is a Next.js application built with Firebase for real-time updates and auth
 2.  **Set up AI Features:**
     - Get a Gemini API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
     - In `src/lib/config.ts`, replace the `REPLACE_WITH_YOUR_GEMINI_API_KEY` placeholder with your new key.
-    - Open `src/ai/genkit.ts` and add the `googleAI` plugin back to the `plugins` array in the `genkit` configuration. It should look like this:
-      ```typescript
-      export const ai = genkit({
-        plugins: [googleAI({apiKey: geminiApiKey})],
-        model: 'googleai/gemini-1.5-flash-latest',
-      });
-      ```
 
 3.  **Firebase Setup:**
     - In the Firebase console, enable Authentication (Email/Password and Google sign-in methods).
