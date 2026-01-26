@@ -9,4 +9,4 @@ export const firebaseConfig: FirebaseOptions = {
   appId: "1:728995885616:web:b1a65d8d571ad68f7ab3f5",
 };
 
-export const geminiApiKey = "AIzaSyAJiPZbNuB1sW_hqrxXhuHp_QIBfwxiqTw";
+export const geminiApiKey = "AIzaSyCsroCy80IKzd01udvPFj9xH7YEEsUYhgI";
