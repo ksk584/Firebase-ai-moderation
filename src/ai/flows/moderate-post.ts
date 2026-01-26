@@ -3,8 +3,6 @@
  * @fileOverview A content moderation AI agent.
  *
  * - moderatePost - A function that handles the post moderation process.
- * - ModeratePostInput - The input type for the moderatePost function.
- * - ModeratePostOutput - The return type for the moderatePost function.
  */
 
 import {ai} from '@/ai/genkit';
@@ -12,11 +10,8 @@ import {z} from 'genkit';
 
 const ModeratePostInputSchema = z.object({
   content: z.string().describe('The text content of the post to be moderated.'),
-  imageDataUri: z.string().optional().describe(
-    "An optional image to moderate, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
-  ),
 });
-export type ModeratePostInput = z.infer<typeof ModeratePostInputSchema>;
+type ModeratePostInput = z.infer<typeof ModeratePostInputSchema>;
 
 const ModeratePostOutputSchema = z.object({
   offensive: z
@@ -26,7 +21,7 @@ const ModeratePostOutputSchema = z.object({
     .string()
     .describe('The reason for the moderation decision, if applicable.'),
 });
-export type ModeratePostOutput = z.infer<typeof ModeratePostOutputSchema>;
+type ModeratePostOutput = z.infer<typeof ModeratePostOutputSchema>;
 
 export async function moderatePost(
   input: ModeratePostInput

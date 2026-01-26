@@ -3,8 +3,6 @@
  * @fileOverview Content filtering AI agent using GenAI.
  *
  * - filterPosts - A function that filters posts based on safety and preferences.
- * - FilterPostsInput - The input type for the filterPosts function.
- * - FilterPostsOutput - The return type for the filterPosts function.
  */
 
 import {ai} from '@/ai/genkit';
@@ -18,7 +16,7 @@ const FilterPostsInputSchema = z.object({
       'The user preferences for content filtering, specified as keywords or topics to avoid.'
     ),
 });
-export type FilterPostsInput = z.infer<typeof FilterPostsInputSchema>;
+type FilterPostsInput = z.infer<typeof FilterPostsInputSchema>;
 
 const FilterPostsOutputSchema = z.object({
   isSafe: z
@@ -28,7 +26,7 @@ const FilterPostsOutputSchema = z.object({
     ),
   reason: z.string().describe('The reason for the filtering decision, if applicable.'),
 });
-export type FilterPostsOutput = z.infer<typeof FilterPostsOutputSchema>;
+type FilterPostsOutput = z.infer<typeof FilterPostsOutputSchema>;
 
 export async function filterPosts(input: FilterPostsInput): Promise<FilterPostsOutput> {
   return filterPostsFlow(input);
