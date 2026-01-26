@@ -4,5 +4,5 @@ import { geminiApiKey } from '@/lib/config';
 
 export const ai = genkit({
   plugins: [googleAI({apiKey: geminiApiKey})],
-  model: 'gemini-pro-vision',
+  model: 'googleai/gemini-pro-vision',
 });
