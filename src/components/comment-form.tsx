@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -77,6 +76,7 @@ export function CommentForm({ postId }: CommentFormProps) {
     try {
         const moderationResult = await moderatePost({
             content: values.content,
+            image: imagePreview || undefined,
         });
 
         if (moderationResult.offensive) {

@@ -10,6 +10,12 @@ import {z} from 'genkit';
 
 const ModeratePostInputSchema = z.object({
   content: z.string().describe('The text content of the post to be moderated.'),
+  image: z
+    .string()
+    .optional()
+    .describe(
+      "An optional image associated with the post, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+    ),
 });
 
 const ModeratePostOutputSchema = z.object({
@@ -31,7 +37,7 @@ const prompt = ai.definePrompt({
   name: 'moderatePostPrompt',
   input: {schema: ModeratePostInputSchema},
   output: {schema: ModeratePostOutputSchema},
-  prompt: `You are an AI content moderator for a social media platform. Your task is to determine if a post is offensive based on its text content. Image content will not be analyzed.
+  prompt: `You are an AI content moderator for a social media platform. Your task is to determine if a post is offensive based on its text and/or image content.
 
   Analyze the following post for any of the following violations:
   - Hate speech
@@ -41,6 +47,9 @@ const prompt = ai.definePrompt({
   - Sexually explicit content
   
   Post Text: {{{content}}}
+  {{#if image}}
+  Image: {{media url=image}}
+  {{/if}}
 
   If the post is offensive, set the 'offensive' field to true and provide a concise reason in the 'reason' field.
   If the post is not offensive, set the 'offensive' field to false and the 'reason' field to an empty string.`,
