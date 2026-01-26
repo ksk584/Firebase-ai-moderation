@@ -77,6 +77,7 @@ export function CommentForm({ postId }: CommentFormProps) {
     try {
         const moderationResult = await moderatePost({
             content: values.content,
+            imageDataUri: imagePreview || undefined,
         });
 
         if (moderationResult.offensive) {

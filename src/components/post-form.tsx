@@ -77,7 +77,8 @@ export function PostForm({ onPostSuccess }: PostFormProps) {
     setIsSubmitting(true);
     try {
         const moderationResult = await moderatePost({ 
-          content: values.content, 
+          content: values.content,
+          imageDataUri: imagePreview || undefined,
         });
 
         if (moderationResult.offensive) {
