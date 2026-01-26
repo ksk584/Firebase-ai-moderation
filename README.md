@@ -1,6 +1,6 @@
-# AnonVerse
+# SafeSocial
 
-Welcome to AnonVerse, a place to share your thoughts anonymously.
+Welcome to SafeSocial, a place to share your thoughts safely.
 
 This is a Next.js application built with Firebase for real-time updates and authentication.
 

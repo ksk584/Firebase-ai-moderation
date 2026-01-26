@@ -18,10 +18,10 @@ export default function Home() {
       <main className="container mx-auto max-w-2xl min-h-screen py-8 px-4">
         <header className="text-center mb-8">
           <h1 className="text-5xl font-bold tracking-tight text-primary">
-            AnonVerse
+            SafeSocial
           </h1>
           <p className="text-muted-foreground mt-2">
-            Share your thoughts. Anonymously.
+            A safe place to share your thoughts.
           </p>
         </header>
 
