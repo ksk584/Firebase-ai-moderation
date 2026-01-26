@@ -11,7 +11,6 @@ import {z} from 'genkit';
 const ModeratePostInputSchema = z.object({
   content: z.string().describe('The text content of the post to be moderated.'),
 });
-type ModeratePostInput = z.infer<typeof ModeratePostInputSchema>;
 
 const ModeratePostOutputSchema = z.object({
   offensive: z
@@ -21,11 +20,10 @@ const ModeratePostOutputSchema = z.object({
     .string()
     .describe('The reason for the moderation decision, if applicable.'),
 });
-type ModeratePostOutput = z.infer<typeof ModeratePostOutputSchema>;
 
 export async function moderatePost(
-  input: ModeratePostInput
-): Promise<ModeratePostOutput> {
+  input: z.infer<typeof ModeratePostInputSchema>
+): Promise<z.infer<typeof ModeratePostOutputSchema>> {
   return moderatePostFlow(input);
 }
 
@@ -56,6 +54,10 @@ const moderatePostFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+      // Failsafe: if moderation is inconclusive, assume it's not offensive to avoid blocking the user.
+      return { offensive: false, reason: '' };
+    }
+    return output;
   }
 );

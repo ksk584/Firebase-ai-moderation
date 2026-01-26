@@ -16,7 +16,6 @@ const FilterPostsInputSchema = z.object({
       'The user preferences for content filtering, specified as keywords or topics to avoid.'
     ),
 });
-type FilterPostsInput = z.infer<typeof FilterPostsInputSchema>;
 
 const FilterPostsOutputSchema = z.object({
   isSafe: z
@@ -24,11 +23,15 @@ const FilterPostsOutputSchema = z.object({
     .describe(
       'Whether the content is considered safe and appropriate based on user preferences and general safety guidelines.'
     ),
-  reason: z.string().describe('The reason for the filtering decision, if applicable.'),
+  reason: z
+    .string()
+    .nullable()
+    .describe('The reason for the filtering decision, if applicable.'),
 });
-type FilterPostsOutput = z.infer<typeof FilterPostsOutputSchema>;
 
-export async function filterPosts(input: FilterPostsInput): Promise<FilterPostsOutput> {
+export async function filterPosts(
+  input: z.infer<typeof FilterPostsInputSchema>
+): Promise<z.infer<typeof FilterPostsOutputSchema>> {
   return filterPostsFlow(input);
 }
 
@@ -80,6 +83,10 @@ const filterPostsFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+      // Failsafe: if filtering is inconclusive, assume it's safe to avoid hiding content.
+      return { isSafe: true, reason: null };
+    }
+    return output;
   }
 );
