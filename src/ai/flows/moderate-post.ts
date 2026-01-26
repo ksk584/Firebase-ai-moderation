@@ -38,7 +38,7 @@ const prompt = ai.definePrompt({
   name: 'moderatePostPrompt',
   input: {schema: ModeratePostInputSchema},
   output: {schema: ModeratePostOutputSchema},
-  prompt: `You are an AI content moderator for a social media platform. Your task is to determine if a post is offensive based on its text and/or image content.
+  prompt: `You are an AI content moderator for a social media platform. Your task is to determine if a post is offensive based on its text content. Image content will not be analyzed.
 
   Analyze the following post for any of the following violations:
   - Hate speech
@@ -48,9 +48,6 @@ const prompt = ai.definePrompt({
   - Sexually explicit content
   
   Post Text: {{{content}}}
-  {{#if imageDataUri}}
-  Post Image: {{media url=imageDataUri}}
-  {{/if}}
 
   If the post is offensive, set the 'offensive' field to true and provide a concise reason in the 'reason' field.
   If the post is not offensive, set the 'offensive' field to false and the 'reason' field to an empty string.`,
