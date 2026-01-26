@@ -25,7 +25,7 @@ This is a Next.js application built with Firebase for real-time updates and auth
       ```typescript
       export const ai = genkit({
         plugins: [googleAI({apiKey: geminiApiKey})],
-        model: 'googleai/gemini-2.5-flash',
+        model: 'googleai/gemini-pro-vision',
       });
       ```
 
