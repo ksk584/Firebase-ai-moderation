@@ -12,16 +12,30 @@ This is a Next.js application built with Firebase for real-time updates and auth
 
 ## Getting Started
 
-First, set up your configuration in `src/lib/config.ts`. Open this file and replace the placeholder values for your Firebase project.
+**IMPORTANT: You must complete these steps to run the application.**
 
-You can find your Firebase configuration in your project's settings in the Firebase console.
+1.  **Set up Firebase Configuration:**
+    - Open the file `src/lib/config.ts`.
+    - Replace the placeholder values in the `firebaseConfig` object with the configuration from your own Firebase project. You can find this in your project's settings in the Firebase console.
 
-Next, enable Authentication (Email/Password and Google sign-in) and Firestore in your Firebase project. Create a collection named `posts`.
+2.  **Set up AI Features:**
+    - Get a Gemini API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
+    - In `src/lib/config.ts`, replace the `REPLACE_WITH_YOUR_GEMINI_API_KEY` placeholder with your new key.
+    - Open `src/ai/genkit.ts` and add the `googleAI` plugin back to the `plugins` array in the `genkit` configuration. It should look like this:
+      ```typescript
+      export const ai = genkit({
+        plugins: [googleAI({apiKey: geminiApiKey})],
+        model: 'googleai/gemini-2.5-flash',
+      });
+      ```
 
-Then, run the development server:
+3.  **Firebase Setup:**
+    - In the Firebase console, enable Authentication (Email/Password and Google sign-in methods).
+    - Enable Firestore and create a collection named `posts`.
 
-```bash
-npm run dev
-```
-
-Open [http://localhost:9002](http://localhost:9002) with your browser to see the result.
+4.  **Run the App:**
+    - Run the development server:
+      ```bash
+      npm run dev
+      ```
+    - Open [http://localhost:9002](http://localhost:9002) with your browser to see the result.
